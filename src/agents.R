@@ -1,6 +1,9 @@
-# script with code for agents (adapted from portfolio 1)
+# script with code for agents and simulation (adapted from portfolio 1)
 pacman::p_load(tidyverse)
 
+#' sigmoid
+#' x: input value
+#' tau: temperature parameter
 sigmoid <- function(x, tau) {
     outcome = 1 / (1 + exp(-tau * x))
     return(outcome)
@@ -8,7 +11,7 @@ sigmoid <- function(x, tau) {
 
 #' REINFORCEMENT_Agent
 #' previous_choice: vector of previous choice ( c(1,0) or c(0,1) )
-#' previous_values: vector of previous values as (right hand, left hand) e.g., (0.8, 0.2)
+#' previous_values: vector of previous values as (right hand, left hand) e.g., c(0.8, 0.2)
 #' feedback: 1 if previous choice was correct, 0 if previous choice was incorrect
 #' alpha: learning rate
 #' tau: temperature parameter (controls randomness of choice). Tau at 0 -> stochastic
