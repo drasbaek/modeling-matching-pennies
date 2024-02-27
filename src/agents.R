@@ -32,10 +32,6 @@ REINFORCEMENT_Agent <- function(previous_choice, previous_values, feedback, alph
     # make choice based on value
     choice = rbinom(1, 1, p)
 
-    # vectorize choice (if choice == 1 then the vector should )
-    if (choice == 1) {choice = c(1,0)}
-    else {choice = c(0,1)}
-
     # return choice and value
     return(list(choice, new_values))
 }
