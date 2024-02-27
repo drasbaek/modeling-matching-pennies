@@ -49,6 +49,7 @@ play_game_RL <- function(n_trials, alpha_picker=0.2, tau_picker=0.3) {
     feedback_picker[1] <- ifelse(choices_hider[1] == choices_picker[1], 1, 0)
     
     for (i in 2:n_trials){
+        print(i)
         # set the hider as an agent with FIXED learning rate and tau
         hider <- REINFORCEMENT_Agent(previous_choice = choices_hider[i-1], previous_value = c(value1_hider[i-1], value2_hider[i-1]), feedback = feedback_hider[i-1], alpha = 0.2, tau = 0.4)
         

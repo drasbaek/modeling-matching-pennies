@@ -20,7 +20,11 @@ REINFORCEMENT_Agent <- function(previous_choice, previous_values, feedback, alph
     
     # compute previous correct choice from feeddback and previous choice (if feedback is 1, previous correct choice is previous choice, otherwise it is the opposite)
     if (feedback == 1) {previous_correct_choice = previous_choice}
-    else {previous_correct_choice = rev(previous_choice)}
+    else {previous_correct_choice = 1-previous_choice}
+
+    # vectorize previous_correct_choice
+    if (previous_correct_choice == 1) {previous_correct_choice = c(1, 0)}
+    else {previous_correct_choice = c(0, 1)}
 
     # update value
     new_values = (1-alpha) * previous_values + alpha * previous_correct_choice
