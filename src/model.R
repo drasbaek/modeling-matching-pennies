@@ -4,14 +4,15 @@ pacman::p_load(tidyverse, here, cmdstanr)
 stan_filepath = here::here("stan", "RL.stan")
 
 # read data
-df_filepath = here::here("data", "120_trials.csv")
+n_trials = 120
+df_filepath = here::here("data", paste0(n_trials, "_trials.csv"))
 df <- read_csv(df_filepath)
 
 # split the df based on agent_id
 dfs <- split(df, f = df$agent_id)
 
 # iterate over dfs
-for (i in 1:length(length(dfs))){
+for (i in 1:length(dfs)){
     # get the data correct
     df <- dfs[[i]]
     data <- list("trials" = length(df$trial), "choice"= df$choices, "feedback" = df$feedback)
@@ -30,6 +31,7 @@ for (i in 1:length(length(dfs))){
         max_treedepth = 10,
         adapt_delta = 0.99
     )
-    }
 
-print(samples$summary())
+    # save samples
+    save(samples, file = here::here("samples", paste0(n_trials, "_trials"), paste0("samples_", i, ".RData")))
+    }
