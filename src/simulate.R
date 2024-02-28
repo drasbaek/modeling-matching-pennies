@@ -95,7 +95,6 @@ simulate_games <- function(n_trials, n_games){
 
     # define the learning rates we want to test
     for (i in 1:n_games){
-        print(i)
         # sample tau from uniform and alpha constrained between 0 and 1
         alpha <- runif(1, 0, 1)
         tau <- runif(1, 0, 5)
