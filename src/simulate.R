@@ -49,7 +49,6 @@ play_game_RL <- function(n_trials, alpha_picker=0.2, tau_picker=0.3) {
     feedback_picker[1] <- ifelse(choices_hider[1] == choices_picker[1], 1, 0)
     
     for (i in 2:n_trials){
-        print(i)
         # set the hider as an agent with FIXED learning rate and tau
         hider <- REINFORCEMENT_Agent(previous_choice = choices_hider[i-1], previous_value = c(value1_hider[i-1], value2_hider[i-1]), feedback = feedback_hider[i-1], alpha = 0.2, tau = 0.4)
         
@@ -63,8 +62,8 @@ play_game_RL <- function(n_trials, alpha_picker=0.2, tau_picker=0.3) {
         # get values
         value1_hider[i] <- hider[[2]][1]
         value2_hider[i] <- hider[[2]][2]
-        value1_hider[i] <- picker[[2]][1]
-        value2_hider[i] <- picker[[2]][2]
+        value1_picker[i] <- picker[[2]][1]
+        value2_picker[i] <- picker[[2]][2]
 
         # get feedback
         feedback_hider[i] <- ifelse(choices_hider[i] != choices_picker[i], 1, 0)
@@ -82,9 +81,9 @@ play_game_RL <- function(n_trials, alpha_picker=0.2, tau_picker=0.3) {
     hider_df["trial"] <- 1:n_trials
     picker_df["trial"] <- 1:n_trials
 
-    # add learning rate and tau
-    picker_df["learning_rate"] <- learning_rate
-    picker_df["tau"] <- tau
+    # add alpha and tau
+    picker_df["alpha"] <- alpha_picker
+    picker_df["tau"] <- tau_picker
 
     return(picker_df)
 }
@@ -96,6 +95,7 @@ simulate_games <- function(n_trials, n_games){
 
     # define the learning rates we want to test
     for (i in 1:n_games){
+        print(i)
         # sample tau from uniform and alpha constrained between 0 and 1
         alpha <- runif(1, 0, 1)
         tau <- runif(1, 0, 5)
@@ -113,4 +113,10 @@ simulate_games <- function(n_trials, n_games){
     return(games_df)
 }
 
-games_df <- simulate_games(120, 5)
+n_trials <- 120
+games_df <- simulate_games(n_trials, 100)
+
+# save the games df
+file_path <- here::here("data", paste0(n_trials, "_trials.csv"))
+
+write_csv(games_df, file_path)
