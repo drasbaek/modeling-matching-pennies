@@ -1,7 +1,7 @@
 # model fitting 
 pacman::p_load(tidyverse, here, cmdstanr)
 
-stan_filepath = here::here("src", "RL.stan")
+stan_filepath = here::here("stan", "RL.stan")
 
 # read data
 df_filepath = here::here("data", "120_trials.csv")
