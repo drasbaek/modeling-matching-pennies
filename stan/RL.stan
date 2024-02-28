@@ -61,4 +61,12 @@ model {
   }
 }
 
+generated quantities {
+  real<lower=0, upper=1> alpha_prior;
+  real<lower=0, upper=1> alpha_posterior;
+  real<lower=0, upper=1> tau_prior;
+  real<lower=0, upper=1> tau_posterior;
 
+  alpha_prior = uniform_rng(0, 1);
+  tau_prior = inv_logit(normal_rng(0, 1));
+}
