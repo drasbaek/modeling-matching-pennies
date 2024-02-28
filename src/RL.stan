@@ -60,3 +60,8 @@ model {
     target += bernoulli_lpmf(choice[t] | p);
   }
 }
+
+generated quantities {
+   /* ... declarations ... statements ... */
+   
+}
