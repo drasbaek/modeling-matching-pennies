@@ -61,7 +61,4 @@ model {
   }
 }
 
-generated quantities {
-   /* ... declarations ... statements ... */
-   
-}
+
