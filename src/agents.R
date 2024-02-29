@@ -18,13 +18,13 @@ sigmoid <- function(x, tau) {
 #' - tau: temperature parameter (controls randomness of choice). Tau at 0 -> stochastic
 REINFORCEMENT_Agent <- function(previous_choice, previous_values, feedback, alpha, tau){
     
-    # compute previous correct choice from feeddback and previous choice (if feedback is 1, previous correct choice is previous choice, otherwise it is the opposite)
-    if (feedback == 1) {previous_correct_choice = previous_choice}
-    else {previous_correct_choice = 1-previous_choice}
-
-    # vectorize previous_correct_choice
-    if (previous_correct_choice == 1) {previous_correct_choice = c(1, 0)}
-    else {previous_correct_choice = c(0, 1)}
+    # compute previous correct choice from feedback and previous choice (if feedback is 1, previous correct choice is previous choice, otherwise it is the opposite)
+    if (feedback == 1) {
+        previous_correct_choice = c(previous_choice, 1 - previous_choice)
+    }
+    else {
+    previous_correct_choice = c(1 - previous_choice, previous_choice)
+    }
 
     # update value
     new_values = (1-alpha) * previous_values + alpha * previous_correct_choice
