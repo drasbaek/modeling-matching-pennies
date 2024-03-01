@@ -37,7 +37,7 @@ model {
   target += uniform_lpdf(alpha | 0, 1);
   target += normal_lpdf(logTau | 0, 1); 
 
-  if (!onlyprior) // if onlyprior is 1 then the likelihood is not calculated
+  if (!onlyprior) { // if onlyprior is 1 then the likelihood is not calculated
     // likelihood
     // set initial value of Value (first trial)
     Value = initialValue;
@@ -61,18 +61,23 @@ model {
       // make choice and define likelihood (add log-likelihood to target)
       target += bernoulli_lpmf(choice[t] | p);
     }
+  }
 }
 
 generated quantities {
 
   array[trials] int<lower=0, upper=1> choice_pred; // 1d array to hold predicted sequence of choices given a sampled set of parameters
+  vector[2] Value;
+  vector[2] PrevCorrectChoice;
+  real diff;
+  real p;
 
   Value = initialValue;
 
   // make choice on trial 1
   diff = Value[1] - Value[2];
   p = inv_logit(-tau * diff);
-  choice_pred[1] += bernoulli_rng(p);
+  choice_pred[1] = bernoulli_rng(p);
 
   // predict choice for remaining trials
   for (t in 2:trials){
@@ -88,6 +93,6 @@ generated quantities {
     diff = Value[1] - Value[2];
     p = inv_logit(-tau * diff);
     
-    choice_pred[t] += bernoulli_rng(p);
+    choice_pred[t] = bernoulli_rng(p);
   }
 }
