@@ -4,7 +4,7 @@ pacman::p_load(tidyverse, here, cmdstanr)
 stan_filepath = here::here("stan", "RL.stan")
 
 # fitting function
-fit_model <- function(data, onlyprior = 1){
+fit_model <- function(df, onlyprior = 1){
     
     # prepare the data
     data <- list("trials" = length(df$trial), 
