@@ -9,8 +9,7 @@ data {
 }
 
 transformed data {
-  vector[2] initialValue;  // initial values (0.5, 0.5)
-  initialValue = rep_vector(0.5, 2);
+  int<lower=0, upper=1> initialValue;  // 0.5 is most appropriate
 }
 
 // parameters 
@@ -28,8 +27,8 @@ transformed parameters {
 // model to be estimated
 model {
   // def model variables
-  vector[2] Value;
-  vector[2] PrevCorrectChoice;
+  array[trials] real<lower=0, upper=1> value1; // 1d array to hold value of choice 1 (right)
+  array[trials] real<lower=0, upper=1> value2; // 1d array to hold value of choice 2 (left)
   real diff;
   real p;
 
@@ -39,26 +38,26 @@ model {
 
   if (!onlyprior) { // if onlyprior is 1 then the likelihood is not calculated
     // likelihood
-    // set initial value of Value (first trial)
-    Value = initialValue;
+    // set initial values (first trial)
+    value1[1] = initialValue;
+    value2[1] = initialValue;
 
+    // make choice on trial 1 
+    diff = value1[1] - value2[1];
+    p = inv_logit(-tau * diff);
+    
+    // add log-likelihood of choice on first trial to target
+    target += bernoulli_lpmf(choice[1] | p);
+
+    // add log-likelihood of choices of remaining trials
     for (t in 2:trials){
-      // define previous correct choice  
-      if (feedback[t-1] == 1) {
-        PrevCorrectChoice = transpose([choice[t-1], 1 - choice[t-1]]); // if feedback is 1, then previous correct choice is the same 
-      }
-      else {
-        PrevCorrectChoice = transpose([1 - choice[t-1], choice[t-1]]); // if feedback is 0, then previous correct choice is the opposite
-      }
 
-      // update values
-      Value = (1-alpha) * Value + alpha * PrevCorrectChoice;
-
-      // calculate probability
-      diff = Value[1] - Value[2]; // difference in value of choices
-      p = inv_logit(-tau * diff);
+      value1[t] = value1[t-1] + alpha * choice[t-1] * (feedback[t-1] - value1[t-1])
+      value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1])
       
-      // make choice and define likelihood (add log-likelihood to target)
+      diff = value1[t] - value2[t];
+      p = inv_logit(-tau * diff);
+
       target += bernoulli_lpmf(choice[t] | p);
     }
   }
@@ -67,30 +66,26 @@ model {
 generated quantities {
 
   array[trials] int<lower=0, upper=1> choice_pred; // 1d array to hold predicted sequence of choices given a sampled set of parameters
-  vector[2] Value;
-  vector[2] PrevCorrectChoice;
+  array[trials] real<lower=0, upper=1> value1; 
+  array[trials] real<lower=0, upper=1> value2;
   real diff;
   real p;
 
-  Value = initialValue;
+  value1[1] = initialValue;
+  value2[1] = initialValue;
 
   // make choice on trial 1
-  diff = Value[1] - Value[2];
+  diff = value1[1] - value2[1];
   p = inv_logit(-tau * diff);
   choice_pred[1] = bernoulli_rng(p);
 
   // predict choice for remaining trials
   for (t in 2:trials){
-    if (feedback[t-1] == 1) {
-      PrevCorrectChoice = transpose([choice[t-1], 1 - choice[t-1]]); 
-    }
-    else {
-      PrevCorrectChoice = transpose([1 - choice[t-1], choice[t-1]]);
-    }
-
-    Value = (1-alpha) * Value + alpha * PrevCorrectChoice;
-
-    diff = Value[1] - Value[2];
+    
+    value1[t] = value1[t-1] + alpha * choice[t-1] * (feedback[t-1] - value1[t-1])
+    value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1])
+    
+    diff = value1[t] - value2[t];
     p = inv_logit(-tau * diff);
     
     choice_pred[t] = bernoulli_rng(p);

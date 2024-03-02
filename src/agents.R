@@ -11,25 +11,21 @@ sigmoid <- function(x, tau) {
 
 #' REINFORCEMENT_Agent
 #' Define a reinforcement learning agent
-#' - previous_choice: vector of previous choice e.g., c(1,0) meaning that right hand was chosen or c(0,1) meaning that the left hand was chosen
+#' - previous_choice: either 1 (right) or 0 (left)
 #' - previous_values: vector of previous values as (right hand, left hand) e.g., c(0.8, 0.2)
-#' - feedback: 1 if previous choice was correct, 0 if previous choice was incorrect
+#' - previous_feedback: 1 if previous choice was correct, 0 if previous choice was incorrect
 #' - alpha: learning rate
-#' - tau: temperature parameter (controls randomness of choice). Tau at 0 -> stochastic
-REINFORCEMENT_Agent <- function(previous_choice, previous_values, feedback, alpha, tau){
-    
-    # compute previous correct choice from feedback and previous choice (if feedback is 1, previous correct choice is previous choice, otherwise it is the opposite)
-    if (feedback == 1) {
-        previous_correct_choice = c(previous_choice, 1 - previous_choice)
-    }
-    else {
-    previous_correct_choice = c(1 - previous_choice, previous_choice)
-    }
+#' - tau: temperature parameter (controls randomness of choice, tau at 0 -> stochastic)
+REINFORCEMENT_Agent <- function(previous_choice, previous_values, previous_feedback, alpha, tau){
 
-    # update value
-    new_values = (1-alpha) * previous_values + alpha * previous_correct_choice
+  
+    # update values
+    v1 = previous_values[1] + alpha * previous_choice * (previous_feedback - previous_values[1])
+    v2 = previous_values[2] + alpha * (1 - previous_choice) * (previous_feedback - previous_values[2])
+  
+    new_values = c(v1, v2)
 
-    # convert difference in values (right minus left) to propability (of choosing right)
+    # convert difference in values (right minus left) to probability (of choosing right)
     val_diff = new_values[1] - new_values[2]
     p = sigmoid(val_diff, tau)
 
