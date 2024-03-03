@@ -1,4 +1,4 @@
-# model fitting 
+# A script for producing plots with prior and posterior predictive checks
 pacman::p_load(tidyverse, here, cmdstanr)
 
 stan_filepath = here::here("stan", "RL.stan")
@@ -36,7 +36,12 @@ df <- read_csv(df_filepath)
 n_trials <- max(df$trial)
 
 # split the df (with picker info only) based on scenario
-dfs <- split(df[df$role == 'picker'], f = df$scenario)
+dfs_with_hider <- split(df, f = df$scenario)
+
+dfs <- lapply(dfs_with_hider, function(df){
+    df <- df %>% filter(role == "picker")
+    return(df)
+})
 
 #' sampling based on priors only
 #' only need to fit on one scenario since prior predictive checks are invariant to the data
@@ -69,7 +74,7 @@ prior_predict_df <- data.frame(trial = 1:n_trials,
 
 
 # add hider's choice to the data
-prior_predict_df$hider_choice <- dfs[[1]]$choices[dfs[[1]]$role == 'hider']
+prior_predict_df$hider_choice <- dfs_with_hider[[1]]$choices[dfs[[1]]$role == 'hider']
 
 
 # prepare data for posterior predictive check
@@ -93,7 +98,7 @@ posterior_predict_dfs <- lapply(posterior_predict_samples, function(values_list)
 
 # add hider's choice and alpha and tau to the data
 for (i in 1:length(posterior_predict_dfs)){
-    posterior_predict_dfs[[i]]$hider_choice <- dfs[[i]]$choices[dfs[[i]]$role == 'hider']
+    posterior_predict_dfs[[i]]$hider_choice <- dfs_with_hider[[i]]$choices[dfs[[i]]$role == 'hider']
     posterior_predict_dfs[[i]]$alpha <- dfs[[i]]$alpha[1]
     posterior_predict_dfs[[i]]$tau <- dfs[[i]]$tau[1]
 }
