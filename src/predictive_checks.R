@@ -1,5 +1,5 @@
 # A script for producing plots with prior and posterior predictive checks
-pacman::p_load(tidyverse, here, cmdstanr)
+pacman::p_load(tidyverse, here, cmdstanr, rstan, posterior)
 
 stan_filepath = here::here("stan", "RL.stan")
 
@@ -35,16 +35,11 @@ df_filepath = here::here("data", "games_for_pred_check.csv")
 df <- read_csv(df_filepath)
 n_trials <- max(df$trial)
 
-# split the df (with picker info only) based on scenario
-dfs_with_hider <- split(df, f = df$scenario)
-
-dfs <- lapply(dfs_with_hider, function(df){
-    df <- df %>% filter(role == "picker")
-    return(df)
-})
+# split the df based on scenario
+dfs <- split(df, f = df$scenario)
 
 #' sampling based on priors only
-#' only need to fit on one scenario since prior predictive checks are invariant to the data
+#' arbitrary choice of fitting in scenario 1, because the model never sees the data anywas when onlyPrior=1
 prior_samples <- fit_model(dfs[[1]], onlyprior = 1)
 
 
@@ -55,11 +50,12 @@ posterior_samples <- lapply(dfs, function(df){
 })
 
 # extract values
-prior_predict_samples <- list(value1 = extract(posterior_samples)$value1, 
-                              value2 = extract(posterior_samples)$value2) # each an array with dim 8000 samples x n_trials
+prior_predict_samples <- list(value1 = as_draws_matrix(prior_samples$draws(variables= "value1")), 
+                              value2 = as_draws_matrix(prior_samples$draws(variables= "value2"))) # each a matrix with dimensions 8000 samples x n_trials
 
 posterior_predict_samples <- lapply(posterior_samples, function(samples){
-    list(value1 = extract(samples)$value1, value2 = extract(samples)$value2) 
+    list(value1 = as_draws_matrix(samples$draws(variables= "value1")), 
+         value2 = as_draws_matrix(samples$draws(variables= "value2"))) 
 })
 
 # prepare data for prior predictive check
@@ -72,10 +68,8 @@ prior_predict_df <- data.frame(trial = 1:n_trials,
                               value2_1st_quartile = apply(prior_predict_samples$value2, 2, quantile, probs = 0.25))
     
 
-
 # add hider's choice to the data
-prior_predict_df$hider_choice <- dfs_with_hider[[1]]$choices[dfs[[1]]$role == 'hider']
-
+prior_predict_df$hider_choice <- dfs[[1]]$choices
 
 # prepare data for posterior predictive check
 posterior_predict_dfs <- lapply(posterior_predict_samples, function(values_list){
@@ -98,7 +92,7 @@ posterior_predict_dfs <- lapply(posterior_predict_samples, function(values_list)
 
 # add hider's choice and alpha and tau to the data
 for (i in 1:length(posterior_predict_dfs)){
-    posterior_predict_dfs[[i]]$hider_choice <- dfs_with_hider[[i]]$choices[dfs[[i]]$role == 'hider']
+    posterior_predict_dfs[[i]]$hider_choice <- dfs[[i]]$choices
     posterior_predict_dfs[[i]]$alpha <- dfs[[i]]$alpha[1]
     posterior_predict_dfs[[i]]$tau <- dfs[[i]]$tau[1]
 }
@@ -113,13 +107,13 @@ predictive_check_plot <- function(predict_df, title){
         geom_line(aes(y = value2_median), color = "green") +
         geom_line(aes(y = hider_choice), color = "red") +
         labs(title = title, x = "Trial", y = "Value") +
-        theme_minimal()
+        theme_bw()
   
-    # make save title by formatting title
+    # make save_title by formatting title
     save_title <- gsub(", ", "_", title)
     save_title <- gsub(" ", "_", save_title)
     save_title <- gsub("=", "", save_title)
-    ggsave(here::here("plots", paste0(save_title,".png")), plot = plot)
+    ggsave(here::here("plots", paste0(save_title,".jpg")), plot = plot, width = 20, height = 6)
 }
 
 
