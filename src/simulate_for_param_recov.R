@@ -24,19 +24,12 @@ get_initial_choice <- function(tau){
 #' - picker: an RL agent that has varying learning rate and tau. This agents' choices and feedback are stored for parameter recovery
 play_game_RL <- function(n_trials, alpha_hider, alpha_picker, tau_hider, tau_picker) {
     # init arrays to store values, choices and feedback for the agents
-    value1_hider <- array(NA, n_trials)
-    value2_hider <- array(NA, n_trials)
-    choices_hider <- array(NA, n_trials)
-    feedback_hider <- array(NA, n_trials)
+    choices_hider <- c()
 
     value1_picker <- array(NA, n_trials)
     value2_picker <- array(NA, n_trials)
     choices_picker <- array(NA, n_trials)
     feedback_picker <- array(NA, n_trials)
-
-    # set initial value for both agents
-    value1_hider[1] <- 0.5
-    value2_hider[1] <- 0.5
 
     value1_picker[1] <- 0.5
     value2_picker[1] <- 0.5
@@ -46,16 +39,11 @@ play_game_RL <- function(n_trials, alpha_hider, alpha_picker, tau_hider, tau_pic
     choices_picker[1] <- get_initial_choice(tau=tau_picker)
 
     # calculate feedback for first trial for both agents
-    feedback_hider[1] <- ifelse(choices_hider[1] != choices_picker[1], 1, 0)
     feedback_picker[1] <- ifelse(choices_hider[1] == choices_picker[1], 1, 0)
     
     for (i in 2:n_trials){
-        # set the hider as an agent with FIXED learning rate and tau
-        hider <- REINFORCEMENT_Agent(previous_choice = choices_hider[i-1], 
-                                     previous_value = c(value1_hider[i-1], value2_hider[i-1]), 
-                                     previous_feedback = feedback_hider[i-1], 
-                                     alpha = alpha_hider, 
-                                     tau = tau_hider)
+        # get the choice that the hider will make
+        choices_hider[i] <- SIMPLE_Agent(rate = 0.8)
         
         # set the picker as an agent with varying learning rate and tau based on the function input
         picker <- REINFORCEMENT_Agent(previous_choice = choices_picker[i-1], 
@@ -64,43 +52,28 @@ play_game_RL <- function(n_trials, alpha_hider, alpha_picker, tau_hider, tau_pic
                                       alpha = alpha_picker, 
                                       tau = tau_picker)
 
-        # get choices for hider and picker
-        choices_hider[i] <- hider[[1]]
+        # get choices, values and feedback for picker
         choices_picker[i] <- picker[[1]]
-
-        # get values
-        value1_hider[i] <- hider[[2]][1]
-        value2_hider[i] <- hider[[2]][2]
         value1_picker[i] <- picker[[2]][1]
         value2_picker[i] <- picker[[2]][2]
-
-        # get feedback
-        feedback_hider[i] <- ifelse(choices_hider[i] != choices_picker[i], 1, 0)
         feedback_picker[i] <- ifelse(choices_hider[i] == choices_picker[i], 1, 0)
     }
     # bind the information to data frames
-    hider_df <- data.frame("choices" = choices_hider, "feedback" = feedback_hider, "value1" = value1_hider, "value2" = value2_hider)
     picker_df <- data.frame("choices" = choices_picker, "feedback" = feedback_picker, "value1" = value1_picker, "value2" = value2_picker)
 
     # add role to hider_df and picker_df 
-    hider_df["role"] <- "hider"
     picker_df["role"] <- "picker"
 
     # add trial columns
-    hider_df["trial"] <- 1:n_trials
     picker_df["trial"] <- 1:n_trials
-
-    # add alpha and tau
-    hider_df["alpha"] <- alpha_hider
-    hider_df["tau"] <- tau_hider
     
     picker_df["alpha"] <- alpha_picker
     picker_df["tau"] <- tau_picker
 
-    # bind the dataframes
-    game_df <- bind_rows(hider_df, picker_df)
+    # add column for hider choices
+    picker_df["hider_choices"] <- choices_hider
     
-    return(game_df)
+    return(picker_df)
 }
 
 #' simulate games 
