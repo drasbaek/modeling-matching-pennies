@@ -22,10 +22,8 @@ get_initial_choice <- function(tau){
 #' Plays a game of matching pennies between two agents:
 #' - hider: a simple agent with a fixed rate
 #' - picker: an RL agent that has varying learning rate and tau. This agents' choices and feedback are stored for parameter recovery
-play_game_RL <- function(n_trials, alpha_picker, tau_picker) {
-    # init arrays to store values, choices and feedback for the agents
-    choices_hider <- c()
-
+play_game_RL <- function(n_trials, alpha_picker, tau_picker, hider_choices) {
+    
     value1_picker <- array(NA, n_trials)
     value2_picker <- array(NA, n_trials)
     choices_picker <- array(NA, n_trials)
@@ -35,16 +33,12 @@ play_game_RL <- function(n_trials, alpha_picker, tau_picker) {
     value2_picker[1] <- 0.5
 
     # init first trial vals for both agents
-    choices_hider[1] <- SIMPLE_Agent(rate = 0.8)
     choices_picker[1] <- get_initial_choice(tau=tau_picker)
 
     # calculate feedback for first trial for both agents
-    feedback_picker[1] <- ifelse(choices_hider[1] == choices_picker[1], 1, 0)
+    feedback_picker[1] <- ifelse(hider_choices[1] == choices_picker[1], 1, 0)
     
-    for (i in 2:n_trials){
-        # get the choice that the hider will make
-        choices_hider[i] <- SIMPLE_Agent(rate = 0.8)
-        
+    for (i in 2:n_trials){        
         # set the picker as an agent with varying learning rate and tau based on the function input
         picker <- REINFORCEMENT_Agent(previous_choice = choices_picker[i-1], 
                                       previous_value = c(value1_picker[i-1], value2_picker[i-1]), 
@@ -56,7 +50,7 @@ play_game_RL <- function(n_trials, alpha_picker, tau_picker) {
         choices_picker[i] <- picker[[1]]
         value1_picker[i] <- picker[[2]][1]
         value2_picker[i] <- picker[[2]][2]
-        feedback_picker[i] <- ifelse(choices_hider[i] == choices_picker[i], 1, 0)
+        feedback_picker[i] <- ifelse(hider_choices[i] == choices_picker[i], 1, 0)
     }
     # bind the information to data frames
     picker_df <- data.frame("choices" = choices_picker, "feedback" = feedback_picker, "value1" = value1_picker, "value2" = value2_picker)
@@ -71,7 +65,7 @@ play_game_RL <- function(n_trials, alpha_picker, tau_picker) {
     picker_df["tau"] <- tau_picker
 
     # add column for hider choices
-    picker_df["hider_choices"] <- choices_hider
+    picker_df["hider_choices"] <- hider_choices
     
     return(picker_df)
 }
@@ -80,6 +74,9 @@ play_game_RL <- function(n_trials, alpha_picker, tau_picker) {
 simulate_games <- function(n_trials, n_games){
     # init games df
     games_df <- data.frame()
+    
+    # get hider choices
+    hider_choices <- SIMPLE_Agent(n_trials = n_trials, rate = 0.8)
 
     # define the learning rates we want to test
     for (i in 1:n_games){
@@ -88,7 +85,7 @@ simulate_games <- function(n_trials, n_games){
         tau <- runif(1, 0, 5)
 
         # play the game with the sampled alpha and tau
-        game_df <- play_game_RL(n_trials, alpha_picker=alpha, tau_picker=tau)
+        game_df <- play_game_RL(n_trials, alpha_picker=alpha, tau_picker=tau, hider_choices)
 
         # add agent id
         game_df["agent_id"] <- i
@@ -100,7 +97,7 @@ simulate_games <- function(n_trials, n_games){
     return(games_df)
 }
 
-n_trials <- 120
+n_trials <- 300
 games_df <- simulate_games(n_trials, 100)
 
 # save the games df

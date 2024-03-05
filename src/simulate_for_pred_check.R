@@ -18,12 +18,18 @@ scenarios_labels <- c("low_low", "low_high", "high_low", "high_high")
 # define the number of trials
 n_trials <- 120
 
+# get the choices from the simple agent  
+set.seed(42)
+hider_choices <- SIMPLE_Agent(n_trials, 0.8)
+
 for (i in 1:4){
-  set.seed(42)
+  print(hider_choices)
+
   # play the game with predefined alpha and tau
   game_df <- play_game_RL(n_trials, 
                           alpha_picker=scenarios[[i]][1], 
-                          tau_picker=scenarios[[i]][2])
+                          tau_picker=scenarios[[i]][2],
+                          hider_choices=hider_choices)
   
   # add agent id
   game_df["scenario"] <- scenarios_labels[i]
