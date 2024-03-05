@@ -69,7 +69,7 @@ prior_predict_df <- data.frame(trial = 1:n_trials,
     
 
 # add hider's choice to the data
-prior_predict_df$hider_choice <- dfs[[1]]$choices
+prior_predict_df$hider_choice <- df$hider_choices[1:n_trials]
 
 # prepare data for posterior predictive check
 posterior_predict_dfs <- lapply(posterior_predict_samples, function(values_list){
@@ -92,7 +92,7 @@ posterior_predict_dfs <- lapply(posterior_predict_samples, function(values_list)
 
 # add hider's choice and alpha and tau to the data
 for (i in 1:length(posterior_predict_dfs)){
-    posterior_predict_dfs[[i]]$hider_choice <- dfs[[i]]$choices
+    posterior_predict_dfs[[i]]$hider_choice <- df$hider_choices[1:n_trials]
     posterior_predict_dfs[[i]]$alpha <- dfs[[i]]$alpha[1]
     posterior_predict_dfs[[i]]$tau <- dfs[[i]]$tau[1]
 }
