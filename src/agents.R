@@ -18,7 +18,6 @@ sigmoid <- function(x, tau) {
 #' - tau: temperature parameter (controls randomness of choice, tau at 0 -> stochastic)
 REINFORCEMENT_Agent <- function(previous_choice, previous_values, previous_feedback, alpha, tau){
 
-  
     # update values
     v1 = previous_values[1] + alpha * previous_choice * (previous_feedback - previous_values[1])
     v2 = previous_values[2] + alpha * (1 - previous_choice) * (previous_feedback - previous_values[2])
@@ -34,4 +33,12 @@ REINFORCEMENT_Agent <- function(previous_choice, previous_values, previous_feedb
 
     # return choice and value
     return(list(choice, new_values))
+}
+
+#' SIMPLE_Agent
+#' Define a simple agent that makes choices based on a fixed rate
+#' - rate: the probability of choosing right
+SIMPLE_Agent <- function(rate){
+    choice = rbinom(1, 1, rate)
+    return(choice)
 }
