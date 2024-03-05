@@ -9,7 +9,8 @@ data {
 }
 
 transformed data {
-  int<lower=0, upper=1> initialValue;  // 0.5 is most appropriate
+  real<lower=0, upper=1> initialValue;  // 0.5 is most appropriate
+  initialValue = 0.5;
 }
 
 // parameters 
@@ -27,8 +28,8 @@ transformed parameters {
 // model to be estimated
 model {
   // def model variables
-  array[trials] real<lower=0, upper=1> value1; // 1d array to hold value of choice 1 (right)
-  array[trials] real<lower=0, upper=1> value2; // 1d array to hold value of choice 2 (left)
+  array[trials] real value1; // 1d array to hold value of choice 1 (right)
+  array[trials] real value2; // 1d array to hold value of choice 2 (left)
   real diff;
   real p;
 
@@ -52,8 +53,8 @@ model {
     // add log-likelihood of choices of remaining trials
     for (t in 2:trials){
 
-      value1[t] = value1[t-1] + alpha * choice[t-1] * (feedback[t-1] - value1[t-1])
-      value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1])
+      value1[t] = value1[t-1] + alpha * choice[t-1] * (feedback[t-1] - value1[t-1]);
+      value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1]);
       
       diff = value1[t] - value2[t];
       p = inv_logit(-tau * diff);
@@ -82,8 +83,8 @@ generated quantities {
   // predict choice for remaining trials
   for (t in 2:trials){
     
-    value1[t] = value1[t-1] + alpha * choice[t-1] * (feedback[t-1] - value1[t-1])
-    value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1])
+    value1[t] = value1[t-1] + alpha * choice[t-1] * (feedback[t-1] - value1[t-1]);
+    value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1]);
     
     diff = value1[t] - value2[t];
     p = inv_logit(-tau * diff);
