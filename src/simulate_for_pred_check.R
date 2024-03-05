@@ -3,6 +3,8 @@ pacman::p_load(tidyverse, here)
 source(here::here("src/agents.R")) # for sigmoid and RL agent
 source(here::here("src/simulate_for_param_recov.R")) # source play_game_RL function
 
+set.seed(42)
+
 # init games df
 games_df <- data.frame()
 

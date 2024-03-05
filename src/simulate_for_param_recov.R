@@ -1,6 +1,7 @@
 # script for creating a game and simulating data for parameter recovery
 pacman::p_load(tidyverse, here)
 source(here::here("src/agents.R")) # for sigmoid and RL agent
+set.seed(42)
 
 #' get_initial_choice 
 get_initial_choice <- function(tau){
