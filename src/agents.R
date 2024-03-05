@@ -38,7 +38,8 @@ REINFORCEMENT_Agent <- function(previous_choice, previous_values, previous_feedb
 #' SIMPLE_Agent
 #' Define a simple agent that makes choices based on a fixed rate
 #' - rate: the probability of choosing right
-SIMPLE_Agent <- function(rate){
-    choice = rbinom(1, 1, rate)
-    return(choice)
+SIMPLE_Agent <- function(n_trials, rate){
+    set.seed(42)
+    choices = rbinom(n_trials, 1, rate)
+    return(choices)
 }
