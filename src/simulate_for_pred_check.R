@@ -3,8 +3,6 @@ pacman::p_load(tidyverse, here)
 source(here::here("src/agents.R")) # for sigmoid and RL agent
 source(here::here("src/simulate_for_param_recov.R")) # source play_game_RL function
 
-set.seed(42)
-
 # init games df
 games_df <- data.frame()
 
@@ -21,12 +19,10 @@ scenarios_labels <- c("low_low", "low_high", "high_low", "high_high")
 n_trials <- 120
 
 for (i in 1:4){
-
+  set.seed(42)
   # play the game with predefined alpha and tau
   game_df <- play_game_RL(n_trials, 
-                          alpha_hider=0.2, 
                           alpha_picker=scenarios[[i]][1], 
-                          tau_hider=0.4, 
                           tau_picker=scenarios[[i]][2])
   
   # add agent id

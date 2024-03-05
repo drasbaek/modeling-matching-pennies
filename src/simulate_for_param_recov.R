@@ -20,9 +20,9 @@ get_initial_choice <- function(tau){
 
 #' play_game_RL
 #' Plays a game of matching pennies between two agents:
-#' - hider: an RL agent that has FIXED learning rate and tau (just to enable the game)
+#' - hider: a simple agent with a fixed rate
 #' - picker: an RL agent that has varying learning rate and tau. This agents' choices and feedback are stored for parameter recovery
-play_game_RL <- function(n_trials, alpha_hider, alpha_picker, tau_hider, tau_picker) {
+play_game_RL <- function(n_trials, alpha_picker, tau_picker) {
     # init arrays to store values, choices and feedback for the agents
     choices_hider <- c()
 
@@ -35,7 +35,7 @@ play_game_RL <- function(n_trials, alpha_hider, alpha_picker, tau_hider, tau_pic
     value2_picker[1] <- 0.5
 
     # init first trial vals for both agents
-    choices_hider[1] <- get_initial_choice(tau=tau_hider)
+    choices_hider[1] <- SIMPLE_Agent(rate = 0.8)
     choices_picker[1] <- get_initial_choice(tau=tau_picker)
 
     # calculate feedback for first trial for both agents
@@ -88,7 +88,7 @@ simulate_games <- function(n_trials, n_games){
         tau <- runif(1, 0, 5)
 
         # play the game with the sampled alpha and tau
-        game_df <- play_game_RL(n_trials, alpha_hider=0.2, alpha_picker=alpha, tau_hider=0.4, tau_picker=tau)
+        game_df <- play_game_RL(n_trials, alpha_picker=alpha, tau_picker=tau)
 
         # add agent id
         game_df["agent_id"] <- i
