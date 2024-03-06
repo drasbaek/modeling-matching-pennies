@@ -15,12 +15,14 @@ transformed data {
 
 // parameters 
 parameters {
-  real<lower=0, upper=1> alpha; // learning rate, continous val between 0 and 1
+  real<lower=0, upper=1> alpha; // learning rate, continous val between 0 and 1. Reparam: real logitAlpha;
   real logTau; //
 }
 
 // transformed parameters
 transformed parameters {
+  //real<lower=0, upper=1> alpha;  // For Reparam
+  //alpha = inv_logit(logitAlpha); // For Reparam
   real<lower=0> tau;
   tau = exp(logTau);
 }
@@ -34,7 +36,7 @@ model {
   real p;
 
   // priors 
-  target += uniform_lpdf(alpha | 0, 1);
+  target += uniform_lpdf(alpha | 0, 1); // Reparam: normal_lpdf(logitAlpha | 0, 10);
   target += normal_lpdf(logTau | 0, 1); 
 
   if (!onlyprior) { // if onlyprior is 1 then the likelihood is not calculated
@@ -65,12 +67,17 @@ model {
 }
 
 generated quantities {
+  real<lower=0, upper=1> alpha_prior; 
+  real<lower=0> tau_prior;
 
   array[trials] int<lower=0, upper=1> choice_pred; // 1d array to hold predicted sequence of choices given a sampled set of parameters
   array[trials] real<lower=0, upper=1> value1; 
   array[trials] real<lower=0, upper=1> value2;
   real diff;
   real p;
+
+  alpha_prior = uniform_rng(0, 1); // Reparam: alpha_prior = inv_logit(normal_rng(0, 10));
+  tau_prior = exp(normal_rng(0, 1));
 
   value1[1] = initialValue;
   value2[1] = initialValue;
