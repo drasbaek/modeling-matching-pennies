@@ -1,9 +1,50 @@
-# script for creating a game and simulating data for parameter recovery
-pacman::p_load(tidyverse, here)
-source(here::here("src/agents.R")) # for sigmoid and RL agent
-set.seed(42)
+# script with code for agents and simulation (adapted from portfolio 1)
+pacman::p_load(tidyverse)
 
-#' get_initial_choice 
+#' sigmoid
+#' x: input value
+#' tau: temperature parameter
+sigmoid <- function(x, tau) {
+    outcome = 1 / (1 + exp(-tau * x))
+    return(outcome)
+}
+
+#' REINFORCEMENT_Agent
+#' Define a reinforcement learning agent
+#' - previous_choice: either 1 (right) or 0 (left)
+#' - previous_values: vector of previous values as (right hand, left hand) e.g., c(0.8, 0.2)
+#' - previous_feedback: 1 if previous choice was correct, 0 if previous choice was incorrect
+#' - alpha: learning rate
+#' - tau: temperature parameter (controls randomness of choice, tau at 0 -> stochastic)
+REINFORCEMENT_Agent <- function(previous_choice, previous_values, previous_feedback, alpha, tau){
+
+    # update values
+    v1 = previous_values[1] + alpha * previous_choice * (previous_feedback - previous_values[1])
+    v2 = previous_values[2] + alpha * (1 - previous_choice) * (previous_feedback - previous_values[2])
+  
+    new_values = c(v1, v2)
+
+    # convert difference in values (right minus left) to probability (of choosing right)
+    val_diff = new_values[1] - new_values[2]
+    p = sigmoid(val_diff, tau)
+
+    # make choice based on value
+    choice = rbinom(1, 1, p)
+
+    # return choice and value
+    return(list(choice, new_values))
+}
+
+#' SIMPLE_Agent
+#' Define a simple agent that makes choices based on a fixed rate
+#' - rate: the probability of choosing right
+SIMPLE_Agent <- function(n_trials, rate){
+    set.seed(42)
+    choices = rbinom(n_trials, 1, rate)
+    return(choices)
+}
+
+#' get_initial_choice of RL agent
 get_initial_choice <- function(tau){
     # define initial values as 50/50 right and left 
     initial_value <- c(0.5, 0.5)
@@ -17,6 +58,7 @@ get_initial_choice <- function(tau){
 
     return(initial_choice)
 }
+
 
 #' play_game_RL
 #' Plays a game of matching pennies between two agents:
@@ -70,6 +112,7 @@ play_game_RL <- function(n_trials, alpha_picker, tau_picker, hider_choices) {
     return(picker_df)
 }
 
+
 #' simulate games 
 simulate_games <- function(n_trials, n_games){
     # init games df
@@ -96,11 +139,3 @@ simulate_games <- function(n_trials, n_games){
 
     return(games_df)
 }
-
-n_trials <- 300
-games_df <- simulate_games(n_trials, 100)
-
-# save the games df
-file_path <- here::here("data", paste0(n_trials, "_trials.csv"))
-
-write_csv(games_df, file_path)

@@ -1,19 +1,31 @@
-# script for creating a game and simulating data for prior and posterior predictive checks
+# script for creating a game and simulating data for predictive checks and parameter recovery
 pacman::p_load(tidyverse, here)
-source(here::here("src/agents.R")) # for sigmoid and RL agent
-source(here::here("src/simulate_for_param_recov.R")) # source play_game_RL function
+source(here::here("src/agents.R")) # for agents and simulation functions
+set.seed(42)
+
+n_trials <- 300
+
+##### FOR PARAMETER RECOVERY #####
+
+games_df <- simulate_games(n_trials, 100)
+
+# save the games df
+file_path <- here::here("data", paste0(n_trials, "_trials.csv"))
+
+write_csv(games_df, file_path)
+
+##### FOR PREDICTIVE CHECKS #####
 
 # init games df
 games_df <- data.frame()
 
 # define the parameters we want to test c(alpha, tau)
-low_low <- c(0.2, 0.4)
-low_high <- c(0.2, 2)
-high_low <- c(0.8, 0.4)
-high_high <- c(0.8, 2)
+low_low <- c(0.1, 0.1)
+low_high <- c(0.1, 5)
+high_low <- c(0.9, 0.1)
+high_high <- c(0.9, 5)
 scenarios <- list(low_low, low_high, high_low, high_high)
 scenarios_labels <- c("low_low", "low_high", "high_low", "high_high")
-
 
 # define the number of trials
 n_trials <- 120
