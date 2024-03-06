@@ -47,7 +47,7 @@ model {
 
     // make choice on trial 1 
     diff = value1[1] - value2[1];
-    p = inv_logit(-tau * diff);
+    p = 1 / (1 + exp(-tau * diff));
     
     // add log-likelihood of choice on first trial to target
     target += bernoulli_lpmf(choice[1] | p);
@@ -59,7 +59,7 @@ model {
       value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1]);
       
       diff = value1[t] - value2[t];
-      p = inv_logit(-tau * diff);
+      p = 1 / (1 + exp(-tau * diff));
 
       target += bernoulli_lpmf(choice[t] | p);
     }
@@ -84,7 +84,7 @@ generated quantities {
 
   // make choice on trial 1
   diff = value1[1] - value2[1];
-  p = inv_logit(-tau * diff);
+  p = 1 / (1 + exp(-tau * diff));
   choice_pred[1] = bernoulli_rng(p);
 
   // predict choice for remaining trials
@@ -94,7 +94,7 @@ generated quantities {
     value2[t] = value2[t-1] + alpha * (1 - choice[t-1]) * (feedback[t-1] - value2[t-1]);
     
     diff = value1[t] - value2[t];
-    p = inv_logit(-tau * diff);
+    p = 1 / (1 + exp(-tau * diff));
     
     choice_pred[t] = bernoulli_rng(p);
   }
