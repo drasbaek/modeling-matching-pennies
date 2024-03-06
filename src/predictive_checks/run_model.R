@@ -101,7 +101,6 @@ for (i in 1:length(posterior_predict_dfs)){
     posterior_predict_dfs[[i]]$tau <- dfs[[i]]$tau[1]
 }
 
-
 # save the data
 write_csv(prior_predict_df, here::here("data", "predictive_checks", "prior.csv"))
 
@@ -109,5 +108,9 @@ for (i in 1:length(posterior_predict_dfs)){
     write_csv(posterior_predict_dfs[[i]], here::here("data", "predictive_checks", paste0("posterior_", names(posterior_predict_dfs)[i], ".csv")))
 }
 
-# save posterior samples as RData
-save(posterior_samples, file = here::here("data", "predictive_checks", "posterior_samples.RData"))
+names <- names(posterior_samples)
+
+for (i in 1:length(posterior_samples)){
+    name <- names[i]
+    posterior_samples[[name]]$save_object(here::here("data", "predictive_checks", paste0("posterior_", name, ".rds")))
+}
