@@ -1,43 +1,31 @@
 pacman::p_load(tidyverse, here)
 
-# load param_df csv
-param_df <- read_csv(here::here("data", "recovery_param_df.csv"))
-
-param_df
-
 # plot estimated MPD versus true values
-recovery_plot_MPD <- function(param_df, parameter, color){
+recovery_plot_MPD <- function(param_df, parameter, color, n_trials){
     plot <- param_df %>%
-        ggplot(aes(x = !!sym(paste0("post_", parameter)), y = !!sym(paste0("true_", parameter)), color=!!sym(paste0("true_", color)))) + 
+        ggplot(aes(x = !!sym(paste0("true_", parameter)), y = !!sym(paste0("MPD_", parameter)), color=!!sym(paste0("MPD_", color)))) + 
         geom_point() +
-        geom_abline(intercept = 0, slope = 1, color = "red") +
-        labs(title = paste0("True ", parameter, " vs MPD ", parameter),
+        scale_color_gradient(low = "#FFD580", high = "darkblue")  +
+        geom_abline(intercept = 0, slope = 1, color = "black") +
+        labs(title = paste0("Estimated ", parameter, " (MPD)", " vs True ", parameter, " (", n_trials, " trials)"),
              y = paste0("True ", parameter),
-             x = paste0("MPD ", parameter)) +
-        theme_minimal()
+             x = paste0("Estimated ", parameter, " (MPD)")) +
+        theme_bw()
 
-    ggsave(here::here("plots", "recovery", paste0(parameter, "_MPD_recovery.jpg")), plot)
+    return(plot)
 }
 
-# plot estimated posterior versus true values
-recovery_plot_post <- function(param_df, parameter, color){
-    plot <- param_df %>%
-        ggplot(aes(x = !!sym(paste0("true_", parameter)), y = !!sym(paste0("post_", parameter)), color=!!sym(paste0("true_", color)), alpha=0.001)) + 
-        geom_point() +
-        geom_abline(intercept = 0, slope = 1, color = "red") +
-        labs(title = paste0("Estimated ", parameter, " vs True ", parameter),
-             y = paste0("post ", parameter),
-             x = paste0("true ", parameter)) +
-        theme_minimal()
+n_trials_list <- c(120, 300)
+for (n_trials in n_trials_list){
+    # load param_df csv
+    data_file_path <- here::here("data", "recovery", paste0(n_trials, "_trials_recovery.csv"))
+    param_df <- read_csv(data_file_path)
 
-    ggsave(here::here("plots", "recovery", paste0(parameter, "_post_recovery.jpg")), plot)
+    parameters <- c("alpha", "tau")
+    colors <- c("tau", "alpha")
+
+    for (j in 1:2) {
+        plot <- recovery_plot_MPD(param_df, parameters[j], colors[j], n_trials)
+        ggsave(here::here("plots", "recovery", paste0(parameters[j], "_", n_trials, "_MPD_recovery.jpg")), plot)
+    }
 }
-
-parameters <- c("alpha", "tau")
-colors <- c("tau", "alpha")
-
-for (i in 1:2) {
-    recovery_plot_post(param_df, parameters[i], colors[i])
-}
-
-
