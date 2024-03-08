@@ -3,7 +3,7 @@ pacman::p_load(tidyverse, here)
 source(here::here("src/game_functions.R")) # for agents and simulation functions
 set.seed(42)
 
-n_trials_list <- c(120, 300)
+n_trials_list <- c(60, 120, 300)
 n_games <- 100
 
 ##### FOR PARAMETER RECOVERY #####
