@@ -50,3 +50,6 @@ rsconnect/
 
 # ign. DS_Store
 .DS_Store
+
+# ign. compiled stan mdl 
+RL 
