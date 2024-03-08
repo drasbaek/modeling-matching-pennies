@@ -104,8 +104,9 @@ process_for_param_recov_plot_post <- function(dfs) {
     return (param_df)
 }
 
-#param_df <- process_for_param_recov_plot_MPD(dfs, param_MPD)
-param_df <- process_for_param_recov_plot_post(dfs)
+param_df <- process_for_param_recov_plot_MPD(dfs, param_MPD)
+#param_df <- process_for_param_recov_plot_post(dfs)
 
 # save the data
-write_csv(param_df, here::here("data", "recovery_param_df.csv"))
+save_filepath <- here::here("data", "recovery", paste0(n_trials, "_trials_recovery.csv"))
+write_csv(param_df, save_filepath)
