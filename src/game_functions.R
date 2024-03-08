@@ -112,7 +112,6 @@ play_game_RL <- function(n_trials, alpha_picker, tau_picker, hider_choices) {
     return(picker_df)
 }
 
-
 #' simulate games 
 simulate_games <- function(n_trials, n_games){
     # init games df
@@ -121,11 +120,16 @@ simulate_games <- function(n_trials, n_games){
     # get hider choices
     hider_choices <- SIMPLE_Agent(n_trials = n_trials, rate = 0.8)
 
+    # get alpha and tau for all games
+    set.seed(42)
+    alphas <- runif(n_games, 0, 1)
+    taus <- runif(n_games, 0, 4)
+
     # define the learning rates we want to test
     for (i in 1:n_games){
-        # sample tau from uniform and alpha constrained between 0 and 1
-        alpha <- runif(1, 0, 1)
-        tau <- runif(1, 0, 5)
+        # obtain the alpha and tau for the current game
+        alpha <- alphas[i]
+        tau <- taus[i]
 
         # play the game with the sampled alpha and tau
         game_df <- play_game_RL(n_trials, alpha_picker=alpha, tau_picker=tau, hider_choices)

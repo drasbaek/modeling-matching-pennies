@@ -1,19 +1,23 @@
 # script for creating a game and simulating data for predictive checks and parameter recovery
 pacman::p_load(tidyverse, here)
-source(here::here("src/agents.R")) # for agents and simulation functions
+source(here::here("src/game_functions.R")) # for agents and simulation functions
 set.seed(42)
 
-n_trials <- 300
+n_trials_list <- c(120, 300)
+n_games <- 100
 
 ##### FOR PARAMETER RECOVERY #####
-
-games_df <- simulate_games(n_trials, 100)
-
-# save the games df
-file_path <- here::here("data", paste0(n_trials, "_trials.csv"))
-
-write_csv(games_df, file_path)
-
+for (i in 1:length(n_trials_list)){
+  n_trials <- n_trials_list[i]
+  
+  # simulate the games
+  games_df <- simulate_games(n_trials, n_games)
+  
+  # save the games df
+  file_path <- here::here("data", paste0(n_trials, "_trials.csv"))
+  
+  write_csv(games_df, file_path)
+}
 ##### FOR PREDICTIVE CHECKS #####
 
 # init games df
@@ -27,16 +31,12 @@ high_high <- c(0.9, 5)
 scenarios <- list(low_low, low_high, high_low, high_high)
 scenarios_labels <- c("low_low", "low_high", "high_low", "high_high")
 
-# define the number of trials
-n_trials <- 120
-
 # get the choices from the simple agent  
 set.seed(42)
+n_trials <- 120
 hider_choices <- SIMPLE_Agent(n_trials, 0.8)
 
 for (i in 1:4){
-  print(hider_choices)
-
   # play the game with predefined alpha and tau
   game_df <- play_game_RL(n_trials, 
                           alpha_picker=scenarios[[i]][1], 
