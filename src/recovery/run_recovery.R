@@ -15,7 +15,7 @@ fit_model <- function(df, stan_filepath, onlyprior = 0){
                  "onlyprior" = onlyprior)
     
     # compile the model
-    model <- cmdstan_model(stan_filepath, cpp_options = list(stan_threads = TRUE), verbose = FALSE)
+    model <- cmdstan_model(stan_filepath, cpp_options = list(stan_threads = TRUE))
     
     # fit the model
     samples <- model$sample(
@@ -54,7 +54,7 @@ param_MPD <- pblapply(samples_list, function(samples){
     return(list(alpha_MPD, tau_MPD))
 })
 
-process_for_param_recov_plot <- function(dfs, param_MPD) {
+process_for_param_recov_plot_MPD <- function(dfs, param_MPD) {
     param_df <- data.frame()
     
     # get the true parameters based on dfs
@@ -66,28 +66,46 @@ process_for_param_recov_plot <- function(dfs, param_MPD) {
         MPD_alpha <- param_MPD[[i]][[1]]
         MPD_tau <- param_MPD[[i]][[2]]
 
-        param_df <- rbind(param_df, data.frame(agent_id, true_alpha, MPD_alpha, true_tau, MPD_tau))
+        param_df <- rbind(param_df, data.frame(agent_id, 
+                                               true_alpha, 
+                                               MPD_alpha, 
+                                               true_tau, 
+                                               MPD_tau
+                                               ))
     }
     return (param_df)
 }
 
-param_df <- process_for_param_recov_plot(dfs, param_MPD)
 
-# plot MPDs versus true values
-recovery_plot <- function(param_df, parameter){
-    plot <- param_df %>%
-        ggplot(aes(x = !!sym(paste0("MPD_", parameter)), y = !!sym(paste0("true_", parameter)))) + 
-        geom_point() +
-        geom_abline(intercept = 0, slope = 1, color = "red") +
-        labs(title = paste0("True ", parameter, " vs MPD ", parameter),
-             y = paste0("True ", parameter),
-             x = paste0("MPD ", parameter)) +
-        theme_minimal()
+process_for_param_recov_plot_post <- function(dfs) {
+    param_df <- data.frame()
+    
+    # get the true parameters based on dfs
+    for (i in 1:length(dfs)) {
+        agent_id <- rep( dfs[[i]]$agent_id[1] , 8000 )
+        true_alpha <- rep( dfs[[i]]$alpha[1] , 8000 )
+        true_tau <- rep( dfs[[i]]$tau[1] , 8000 )
 
-    ggsave(here::here("plots", "recovery", paste0(parameter, "_recovery.jpg")), plot)
+        # only extract 
+        draws_df <- as_draws_df(samples_list[[i]]$draws(variables=c("alpha", "tau")))
+
+        post_alpha <- draws_df$alpha
+        post_tau <- draws_df$tau
+
+        param_df <- rbind(param_df, data.frame("agent_id" = agent_id, 
+                                               "true_alpha" = true_alpha,
+                                               "post_alpha" = post_alpha,  
+                                               "true_tau" = true_tau,
+                                               "post_tau" = post_tau 
+                                               ))
+    }
+
+
+    return (param_df)
 }
 
-for (parameter in c("alpha", "tau")) {
-    recovery_plot(param_df, parameter)
-}
+#param_df <- process_for_param_recov_plot_MPD(dfs, param_MPD)
+param_df <- process_for_param_recov_plot_post(dfs)
 
+# save the data
+write_csv(param_df, here::here("data", "recovery_param_df.csv"))
