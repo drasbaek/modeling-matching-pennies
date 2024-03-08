@@ -25,24 +25,21 @@ predictive_check_plot <- function(predict_df, title){
 posterior_update_plot <- function(posterior_samples_list, posterior_samples_name, param_true, param_col, title){
     draws_df <- as_draws_df(posterior_samples_list$draws())
     
+    # set max on x-axis based on param
+    max_x = ifelse(param_col == "alpha", 1, 5)
+    
     plot <- ggplot(draws_df) +
         geom_density(aes(!!sym(param_col)), fill = "blue", alpha = 0.3) +
         geom_density(aes(!!sym(paste0(param_col, "_prior"))), fill = "red", alpha = 0.3) +
         geom_vline(xintercept = param_true, color = "black", linetype = "dashed") +
-        xlim(0, 5) +
+        xlim(0, max_x) +
         xlab("Learning Rate") +
         ylab("Posterior Density") +
-        labs(title= title) +
-        theme_classic()
+        labs(title=title) +
+        theme_bw()
 
-    ggsave(here::here("plots", "posterior_updates", paste0(name,".jpg")), plot = plot, width = 10, height = 6)
+    ggsave(here::here("plots", "posterior_updates", paste0(param_col, "_", posterior_samples_name, ".jpg")), plot = plot, width = 10, height = 6)
 }
-
-
-chains <- ggplot(draws_df, aes(.iteration, tau, group = .chain, color = .chain)) +
-  geom_line() +
-  theme_classic()
-
 
 # load the data from the predictive checks
 prior_predict <- read_csv(here::here("data", "predictive_checks", "prior.csv"))
@@ -65,6 +62,13 @@ samples_high_low <- readRDS(here::here("data", "predictive_checks", "posterior_h
 samples_low_high <- readRDS(here::here("data", "predictive_checks", "posterior_low_high.rds"))
 samples_low_low <- readRDS(here::here("data", "predictive_checks", "posterior_low_low.rds"))
 
+posterior_samples <- list(
+  "high_high"=samples_high_high,
+  "high_low"=samples_high_low,
+  "low_high"=samples_low_high,
+  "low_low"=samples_low_low
+)
+
 # plot the predictive checks
 predictive_check_plot(prior_predict, "Prior Predictive Check")
 predictive_check_plot(posterior_high_high_predict, "Posterior Predictive Check: High High")
@@ -82,9 +86,12 @@ for (i in 1:length(posterior_samples)){
   true_alpha <- param_dict[[paste(name, ".alpha", sep = "")]]
   true_tau <- param_dict[[paste(name, ".tau", sep = "")]]
 
+  title_alpha <- paste0("Posterior update for: alpha (alpha = ", true_alpha, ", tau = ", true_tau, ")")
+  title_tau <- paste0("Posterior update for: tau (alpha = ", true_alpha, ", tau = ", true_tau, ")")
+
   # plot the posterior
-  posterior_update_plot(posterior_samples[[name]], name, true_alpha, "alpha", paste0("Posterior Update: ", name))
-  posterior_update_plot(posterior_samples[[name]], name, true_tau, "tau", paste0("Posterior Update: ", name))
+  posterior_update_plot(posterior_samples[[name]], name, true_alpha, "alpha", title_alpha)
+  posterior_update_plot(posterior_samples[[name]], name, true_tau, "tau", title_tau)
 }
 
 
