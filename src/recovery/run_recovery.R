@@ -107,7 +107,7 @@ priorSdTau = 1 # actual value of sd for prior
 # read data
 dfs <- load_dfs(n_trials = n_trials)
 
-# fit models
+# fit models (consider making it parallel with https://stackoverflow.com/questions/62916053/r-asynchronous-parallel-lapply)
 samples_list = pblapply(dfs, function(df) { # progress bar list apply
     fit_model(df, stan_filepath, onlyprior = 0, priorTypealpha=priorTypealpha, priorSdTau=priorSdTau)
 })
