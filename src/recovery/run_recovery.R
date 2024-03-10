@@ -128,3 +128,24 @@ param_df <- process_for_param_recov_plot_MPD(dfs, param_MPD)
 # save the data
 save_filepath <- here::here("data", "recovery", paste0(n_trials, "_trials_alpha", priorTypealpha, "_tau", priorSdTau, "_recovery.csv"))
 write_csv(param_df, save_filepath)
+
+## TEMP TEST CHUNK ## 
+# test that it actually works with beta distribution as prior for alpha
+draws_df <- as_draws_df(samples_list[[1]]$draws())
+
+param_col = "alpha"
+max_x = ifelse(param_col == "alpha", 1, 5)
+param_true = 2
+posterior_samples_name = "test_beta_prior"
+
+plot <- ggplot(draws_df) +
+  geom_density(aes(alpha), fill = "blue", alpha = 0.3) +
+  geom_density(aes(alpha_prior), fill = "red", alpha = 0.3) +
+  xlim(0, max_x) +
+  xlab("Learning Rate") +
+  ylab("Posterior Density") +
+  labs(title = "Test Plot") + 
+  theme_bw()
+
+# save as test
+ggsave(here::here("plots", "posterior_updates", paste0(param_col, "_", posterior_samples_name, ".jpg")), plot = plot, width = 10, height = 6)
