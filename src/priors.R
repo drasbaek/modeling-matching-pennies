@@ -1,10 +1,16 @@
 # script for plotting priors
+
+# plot prior (0, 1)
 logtaus <- rnorm(1000, 0, 1)
 taus <- exp(logtaus)
-
-# plot the prior
 hist(taus, breaks=50, main="Prior distribution of tau", xlab="tau", col="lightblue", border="black")
 
+# plot prior (0, 0.2)
+logtaus <- rnorm(1000, 0, 0.2)
+taus <- exp(logtaus)
+hist(taus, breaks=50, main="Prior distribution of tau", xlab="tau", col="lightblue", border="black")
+
+# plot sigmoid curves 
 x_values <- seq(-10, 10, length=100)
 tau_test <- c(0.1, 0.2, 0.3, 0.4, 0.7, 1, 2, 5, 10)
 for (tau in tau_test) {
