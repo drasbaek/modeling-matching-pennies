@@ -21,14 +21,13 @@ transformed data {
 
 // parameters 
 parameters {
-  real<lower=0, upper=1> alpha; // learning rate, continous val between 0 and 1. Reparam: real logitAlpha;
-  real logTau; //
+  real<lower=0, upper=1> alpha; // learning rate, continous val between 0 and 1. 
+  real logTau; //logTau (transformed to tau in transformed parameters)
 }
 
 // transformed parameters
 transformed parameters {
-  //real<lower=0, upper=1> alpha;  // For Reparam
-  //alpha = inv_logit(logitAlpha); // For Reparam
+  // define tau as the exponential of logTau
   real<lower=0> tau;
   tau = exp(logTau);
 }
@@ -41,15 +40,14 @@ model {
   real diff;
   real p;
 
-  // priors 
+  // define prior dependent on priorTypealpha 
   if (priorTypealpha == 0) {
     target += uniform_lpdf(alpha | 0, 1);
   } else {
     target += beta_lpdf(alpha | 2, 2);
   }
 
-  //target += uniform_lpdf(alpha | 0, 1); 
-  target += normal_lpdf(logTau | 0, priorSdTau); 
+  target += normal_lpdf(logTau | 0, priorSdTau); // note that priorSdTau is a hyperparameter that can be set by the user as a data input
 
   if (!onlyprior) { // if onlyprior is 1 then the likelihood is not calculated
     // likelihood
@@ -88,13 +86,13 @@ generated quantities {
   real diff;
   real p;
 
+  // define prior dependent on priorTypealpha
   if (priorTypealpha == 0) {
     alpha_prior = uniform_rng(0, 1);
   } else {
     alpha_prior = beta_rng(2, 2);
   }
 
-  // alpha_prior = uniform_rng(0, 1); // Reparam: alpha_prior = inv_logit(normal_rng(0, 10));
   tau_prior = exp(normal_rng(0, 1));
 
   value1[1] = initialValue;
