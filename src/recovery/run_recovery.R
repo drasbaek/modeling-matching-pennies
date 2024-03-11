@@ -138,9 +138,9 @@ for (n_trials in n_trials_list) {
     
     # run with same tau but changing alpha to a beta(2,2)
     print("Running with alpha as a beta(2,2)")
-    diff_alpha = run_parameter_recovery(stan_filepath, n_trials, priorTypealpha=1, priorSdTau=1, filename = paste0(n_trials, "_trials", "_diff_alpha.csv"))
+    diff_alpha = run_parameter_recovery(stan_filepath, n_trials, priorTypealpha=1, priorSdTau=1, filename = paste0(n_trials, "_trials", "_diffAlpha.csv"))
     
     # run with the original alpha but changing tau's sd to 0.2
     print("Running with tau as (0,0.2)")
-    diff_tau = run_parameter_recovery(stan_filepath, n_trials, priorTypealpha=0, priorSdTau=0.2, filename = paste0(n_trials, "_trials", "_diff_tau.csv"))
+    diff_tau = run_parameter_recovery(stan_filepath, n_trials, priorTypealpha=0, priorSdTau=0.2, filename = paste0(n_trials, "_trials", "_diffTau.csv"))
     }
