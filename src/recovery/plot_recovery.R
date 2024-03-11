@@ -3,7 +3,7 @@ pacman::p_load(tidyverse, here)
 # plot estimated MPD versus true values
 recovery_plot_MPD <- function(param_df, parameter, color, n_trials){
     plot <- param_df %>%
-        ggplot(aes(x = !!sym(paste0("true_", parameter)), y = !!sym(paste0("MPD_", parameter)), color=!!sym(paste0("MPD_", color)))) + 
+        ggplot(aes(x = !!sym(paste0("true_", parameter)), y = !!sym(paste0("MPD_", parameter)), color=!!sym(paste0("true_", color)))) + 
         geom_point() +
         scale_color_gradient(low = "#FFD580", high = "darkblue")  +
         geom_abline(intercept = 0, slope = 1, color = "black") +
