@@ -68,7 +68,7 @@ process_for_param_recov_plot_MPD <- function(dfs, param_MPD) {
     return (param_df)
 }
 
-# function for extracting all estimates (i.e., based on n_iterations) 
+# function for extracting all estimates (i.e., based on n_iterations). NB not used atm!
 process_for_param_recov_plot_post <- function(dfs) {
     param_df <- data.frame()
     
@@ -96,56 +96,51 @@ process_for_param_recov_plot_post <- function(dfs) {
     return (param_df)
 }
 
+run_parameter_recovery <- function(stan_filepath, n_trials, priorTypealpha, priorSdTau, filename) {
+    # read data
+    dfs <- load_dfs(n_trials = n_trials)
+
+    # fit models (consider making it parallel with https://stackoverflow.com/questions/62916053/r-asynchronous-parallel-lapply)
+    samples_list = pblapply(dfs, function(df) { # progress bar list apply
+        fit_model(df, stan_filepath, onlyprior = 0, priorTypealpha=priorTypealpha, priorSdTau=priorSdTau)
+    })
+
+    # extract median of parameter samples
+    param_MPD <- pblapply(samples_list, function(samples){
+        alpha_MPD <- MPD(as_draws_matrix(samples$draws(variables = "alpha")))
+        tau_MPD <- MPD(as_draws_matrix(samples$draws(variables = "tau")))
+
+        return(list(alpha_MPD, tau_MPD))
+    })
+
+    # create df 
+    param_df <- process_for_param_recov_plot_MPD(dfs, param_MPD)
+
+    # save the data
+    save_filepath <- here::here("data", "recovery", filename)
+    write_csv(param_df, save_filepath)
+
+    return(list(samples_list, param_df))
+}
+
 ## RUN PARAMETER RECOVERY ##
 stan_filepath = here::here("stan", "RL.stan")
 
-# arguments for parameter recovery
-n_trials = 120
-priorTypealpha = 1 # bool: 0 uniform, 1 beta
-priorSdTau = 1 # actual value of sd for prior
+# set trial combinations
+n_trials_list <- c(60, 120, 300)
 
-# read data
-dfs <- load_dfs(n_trials = n_trials)
-
-# fit models (consider making it parallel with https://stackoverflow.com/questions/62916053/r-asynchronous-parallel-lapply)
-samples_list = pblapply(dfs, function(df) { # progress bar list apply
-    fit_model(df, stan_filepath, onlyprior = 0, priorTypealpha=priorTypealpha, priorSdTau=priorSdTau)
-})
-
-samples_list
-
-# extract median of parameter samples
-param_MPD <- pblapply(samples_list, function(samples){
-    alpha_MPD <- MPD(as_draws_matrix(samples$draws(variables = "alpha")))
-    tau_MPD <- MPD(as_draws_matrix(samples$draws(variables = "tau")))
+# run parameter recovery for all trial combinations
+for (n_trials in n_trials_list) {
+    print(paste0("Running parameter recovery for ", n_trials, " trials"))
+    # run baseline recovery with alpha as a uniform prior (0, 1) and tau as a lognormal prior (0, 1)
+    print("Running with BASELINE priors")
+    baseline = run_parameter_recovery(stan_filepath, n_trials, priorTypealpha=0, priorSdTau=1, filename = paste0(n_trials, "_trials", "_baseline.csv"))
     
-    return(list(alpha_MPD, tau_MPD))
-})
-
-param_df <- process_for_param_recov_plot_MPD(dfs, param_MPD)
-#param_df <- process_for_param_recov_plot_post(dfs)
-
-# save the data
-save_filepath <- here::here("data", "recovery", paste0(n_trials, "_trials_alpha", priorTypealpha, "_tau", priorSdTau, "_recovery.csv"))
-write_csv(param_df, save_filepath)
-
-## TEMP TEST CHUNK ## 
-# test that it actually works with beta distribution as prior for alpha
-draws_df <- as_draws_df(samples_list[[1]]$draws())
-
-param_col = "alpha"
-max_x = ifelse(param_col == "alpha", 1, 5)
-param_true = 2
-posterior_samples_name = "test_beta_prior"
-
-plot <- ggplot(draws_df) +
-  geom_density(aes(alpha), fill = "blue", alpha = 0.3) +
-  geom_density(aes(alpha_prior), fill = "red", alpha = 0.3) +
-  xlim(0, max_x) +
-  xlab("Learning Rate") +
-  ylab("Posterior Density") +
-  labs(title = "Test Plot") + 
-  theme_bw()
-
-# save as test
-ggsave(here::here("plots", "posterior_updates", paste0(param_col, "_", posterior_samples_name, ".jpg")), plot = plot, width = 10, height = 6)
+    # run with same tau but changing alpha to a beta(2,2)
+    print("Running with alpha as a beta(2,2)")
+    diff_alpha = run_parameter_recovery(stan_filepath, n_trials, priorTypealpha=1, priorSdTau=1, filename = paste0(n_trials, "_trials", "_diff_alpha.csv"))
+    
+    # run with the original alpha but changing tau's sd to 0.2
+    print("Running with tau as (0,0.2)")
+    diff_tau = run_parameter_recovery(stan_filepath, n_trials, priorTypealpha=0, priorSdTau=0.2, filename = paste0(n_trials, "_trials", "_diff_tau.csv"))
+    }
