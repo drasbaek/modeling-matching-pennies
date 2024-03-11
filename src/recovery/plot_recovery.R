@@ -34,14 +34,20 @@ for (n_trials in n_trials_list){
 recovery_files <- list.files(here::here("data", "recovery"), full.names = TRUE)
 
 # iterate through the files and plot the MPD recovery
-for (file in recovery_files){
-    param_df <- read_csv(file)
-    n_trials <- str_extract(file, "\\d+")
+for (filepath in recovery_files){
+    param_df <- read_csv(filepath)
+    
+    # get the BASIC filena
+    filename <- basename(filepath)
+    splitted_filename <- strsplit(filename, "_")
+
+    n_trials <- splitted_filename[[1]]
+    prior_name <- strsplit(splitted_filename[[1]][[3]], ".", fixed = TRUE)[[1]][[1]]
     parameters <- c("alpha", "tau")
     colors <- c("tau", "alpha")
 
     for (j in 1:2) {
         plot <- recovery_plot_MPD(param_df, parameters[j], colors[j], n_trials)
-        ggsave(here::here("plots", "recovery", paste0(parameters[j], "_", n_trials, "_MPD_recovery.jpg")), plot)
+        ggsave(here::here("plots", "recovery", paste0(parameters[j], "_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
     }
 }
