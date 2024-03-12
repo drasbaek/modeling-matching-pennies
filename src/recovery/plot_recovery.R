@@ -1,15 +1,16 @@
-pacman::p_load(tidyverse, here)
+pacman::p_load(tidyverse, here, gridExtra)
 
 # plot estimated MPD versus true values
-recovery_plot_MPD <- function(param_df, parameter, color, n_trials){
+recovery_plot_MPD <- function(param_df, parameter, color, n_trials, prior_name){
     plot <- param_df %>%
         ggplot(aes(x = !!sym(paste0("true_", parameter)), y = !!sym(paste0("MPD_", parameter)), color=!!sym(paste0("true_", color)))) + 
         geom_point(aes(size=2)) +
         scale_color_gradient(low = "#FFD580", high = "darkblue")  +
         geom_abline(intercept = 0, slope = 1, color = "black", linewidth=1.5) +
-        labs(title = paste0("Estimated ", parameter, " (MPD)", " vs True ", parameter, " (", n_trials, " trials)"),
-             y = paste0("Estimated ", parameter),
+        labs(y = paste0("Estimated ", parameter),
              x = paste0("True ", parameter, " (MPD)")) +
+        #ggtitle(paste0("Estimated ", parameter, " (MPD)", " vs True ", parameter, " (", n_trials, " trials)")) +
+        ggtitle(paste0(n_trials, ": ", prior_name)) + 
         theme_bw()+
         theme(legend.key.size = unit(1, 'cm'), 
               legend.text = element_text(size = 12),
@@ -41,10 +42,13 @@ tau_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial
 alpha_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial_type(x) %in% c("diffAlpha")))
 
 # iterate through the files and plot the MPD recovery
+# Create a list to store plots
+plot_list <- list()
+
 for (filepath in baseline_files){
     param_df <- read_csv(filepath)
     
-    # get the BASIC filena
+    # get the BASIC filename
     filename <- basename(filepath)
     splitted_filename <- strsplit(filename, "_")
 
@@ -55,37 +59,56 @@ for (filepath in baseline_files){
     colors <- c("tau", "alpha")
 
     for (j in 1:2) {
-        plot <- recovery_plot_MPD(param_df, parameters[j], colors[j], n_trials)
-        ggsave(here::here("plots", "recovery", paste0(parameters[j], "_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
+        plot <- recovery_plot_MPD(param_df, parameters[j], colors[j], n_trials, prior_name)
+        # append plot to the list with a name
+        plot_list[[paste0(parameters[j], "_", n_trials, "_", prior_name)]] <- plot
+        # save the plot
+        #ggsave(here::here("plots", "recovery", paste0(parameters[j], "_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
     }
 }
 
-# iterate through the files and plot the MPD recovery
+# Iterate through the files and plot the MPD recovery for tau
 for (filepath in tau_files){
     param_df <- read_csv(filepath)
     
-    # get the BASIC filena
+    # get the BASIC filename
     filename <- basename(filepath)
     splitted_filename <- strsplit(filename, "_")
 
     n_trials <- splitted_filename[[1]][1]
     prior_name <- strsplit(splitted_filename[[1]][[3]], ".", fixed = TRUE)[[1]][[1]]
 
-    plot <- recovery_plot_MPD(param_df, "tau", "alpha", n_trials)
-    ggsave(here::here("plots", "recovery", paste0("tau_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
+    plot <- recovery_plot_MPD(param_df, "tau", "alpha", n_trials, prior_name)
+    # append plot to the list with a name
+    plot_list[[paste0("tau_", n_trials, "_", prior_name)]] <- plot
+    # save the plot
+    #ggsave(here::here("plots", "recovery", paste0("tau_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
 }
 
+# Iterate through the files and plot the MPD recovery for alpha
 for (filepath in alpha_files){
     param_df <- read_csv(filepath)
     
-    # get the BASIC filena
+    # get the BASIC filename
     filename <- basename(filepath)
     splitted_filename <- strsplit(filename, "_")
 
     n_trials <- splitted_filename[[1]][1]
     prior_name <- strsplit(splitted_filename[[1]][[3]], ".", fixed = TRUE)[[1]][[1]]
 
-    plot <- recovery_plot_MPD(param_df, "alpha", "tau", n_trials)
-    ggsave(here::here("plots", "recovery", paste0("alpha_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
+    plot <- recovery_plot_MPD(param_df, "alpha", "tau", n_trials, prior_name)
+    # append plot to the list with a name
+    plot_list[[paste0("alpha_", n_trials, "_", prior_name)]] <- plot
+    # save the plot
+    #ggsave(here::here("plots", "recovery", paste0("alpha_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
 }
 
+# plot all 6 alpha plots in grid
+alpha_plots <- plot_list[grep("alpha", names(plot_list))]
+final_alpha_plot <- do.call(grid.arrange, c(alpha_plots, ncol = 3, nrow = 2))
+ggsave(here::here("plots", "recovery", "alpha_recovery.jpg"), final_alpha_plot, width = 20, height = 10)
+
+# plot all 6 tau plots in grid
+tau_plots <- plot_list[grep("tau", names(plot_list))]
+final_tau_plot <- do.call(grid.arrange, c(tau_plots, ncol = 3, nrow = 2))
+ggsave(here::here("plots", "recovery", "tau_recovery.jpg"), final_tau_plot, width = 20, height = 10)
