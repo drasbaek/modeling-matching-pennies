@@ -9,8 +9,11 @@ fit_model <- function(df, onlyprior = 1){
     # prepare the data
     data <- list("trials" = length(df$trial), 
                  "choice"= df$choices, 
-                 "feedback" = df$feedback, #ifelse(df$feedback == 0, -1, 1), 
-                 "onlyprior" = onlyprior)
+                 "feedback" = df$feedback, 
+                 "onlyprior" = onlyprior,
+                 "priorTypeAlpha" = 0,     #uniform 
+                 "priorSdTau" = 1 # sd of log normal prior (logTau)
+                 )
     
     # compile the model
     model <- cmdstan_model(stan_filepath, cpp_options = list(stan_threads = TRUE))
@@ -38,9 +41,12 @@ n_trials <- max(df$trial)
 # split the df based on scenario
 dfs <- split(df, f = df$scenario)
 
-#' sampling based on priors only
-#' arbitrary choice of fitting in scenario 1, because the model never sees the data anywas when onlyPrior=1
+# sampling based on priors only
+# arbitrary choice of fitting in scenario 1, because the model never sees the data anyways when onlyPrior=1
 prior_samples <- fit_model(dfs[[1]], onlyprior = 1)
+
+# save prior
+prior_samples$save_object(here::here("data", "predictive_checks", "prior.rds"))
 
 # sampling based on priors and likelihood
 #' creates a list of samples objects, one per agent (4 in total)

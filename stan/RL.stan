@@ -11,7 +11,7 @@ data {
   real priorSdTau; 
 
   // alpha type 
-  int<lower=0, upper=1> priorTypealpha; // 0 for uniform, 1 for beta
+  int<lower=0, upper=1> priorTypeAlpha; // 0 for uniform, 1 for beta
 }
 
 transformed data {
@@ -41,7 +41,7 @@ model {
   real p;
 
   // define prior dependent on priorTypealpha 
-  if (priorTypealpha == 0) {
+  if (priorTypeAlpha == 0) {
     target += uniform_lpdf(alpha | 0, 1);
   } else {
     target += beta_lpdf(alpha | 2, 2);
@@ -87,7 +87,7 @@ generated quantities {
   real p;
 
   // define prior dependent on priorTypealpha
-  if (priorTypealpha == 0) {
+  if (priorTypeAlpha == 0) {
     alpha_prior = uniform_rng(0, 1);
   } else {
     alpha_prior = beta_rng(2, 2);
