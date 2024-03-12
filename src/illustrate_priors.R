@@ -51,7 +51,7 @@ plot_tau_priors <- function(mean1, sd1, mean2, sd2) {
   # plot
   plot <- ggplot(combined_data, aes(x = taus, fill = prior)) +
     geom_density(alpha = 0.4) +
-    labs(title = "Prior distribution of tau",
+    labs(title = "Prior distributions of tau",
          x = "tau",
          y = "Density") +
     xlim(0, 7) +
@@ -89,7 +89,7 @@ plot_alpha_priors <- function() {
   # plot
   plot <- ggplot(combined_data, aes(x = alphas, fill = prior)) +
     geom_density(alpha = 0.4) +
-    labs(title = "Prior distribution of alpha",
+    labs(title = "Prior distributions of alpha",
          x = "alpha",
          y = "Density") +
     xlim(0, 1) +
