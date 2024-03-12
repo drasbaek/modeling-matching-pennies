@@ -3,13 +3,35 @@ pacman::p_load(tidyverse, here, cmdstanr, posterior)
 #' predictive_check_plot
 predictive_check_plot <- function(predict_df, title, save_title){
     plot <- ggplot(predict_df, aes(x = trial)) +
-        geom_ribbon(aes(ymin = value1_1st_quartile, ymax = value1_3rd_quartile), fill = "lightblue", alpha = 0.5) +
-        geom_line(aes(y = value1_median), color = "blue") +
-        geom_ribbon(aes(ymin = value2_1st_quartile, ymax = value2_3rd_quartile), fill = "lightgreen", alpha = 0.5) +
-        geom_line(aes(y = value2_median), color = "darkgreen") +
-        geom_line(aes(y = hider_choice), color = "red") +
+        # value 1 
+        geom_ribbon(aes(ymin = value1_1st_quartile, ymax = value1_3rd_quartile, fill = "Value 1"), color = NA, alpha = 0.5, show.legend=FALSE) +
+        geom_line(aes(y = value1_median, color = "Value 1")) +
+        
+        # value 2 
+        geom_ribbon(aes(ymin = value2_1st_quartile, ymax = value2_3rd_quartile, fill = "Value 2"), color = NA, alpha = 0.5, show.legend=FALSE) +
+        geom_line(aes(y = value2_median, color = "Value 2")) +
+        
+        # add hider choice 
+        geom_line(aes(y = hider_choice, color = "Hider Choice")) +
+
+        # color and fill of the lines 
+        scale_color_manual(values = c("Value 1" = "blue", "Value 2" = "darkgreen", "Hider Choice" = "red")) +
+        scale_fill_manual(name = "Legend",
+                          values = c("Value 1" = "lightblue", "Value 2" = "lightgreen"),
+                          labels = c("Value 1", "Value 2")) +
+
+        # theme, labels, legend, font sizes
         labs(title = title, x = "Trial", y = "Value") +
-        theme_bw()
+        theme_bw()+
+        theme(legend.position="bottom", 
+              legend.title=element_blank(), 
+              legend.key.size = unit(1, 'cm'), 
+              legend.text = element_text(size = 12),
+              legend.box.spacing = unit(0, "pt"),
+              axis.text=element_text(size=12), 
+              axis.title=element_text(size=14), 
+              plot.title = element_text(size = 16)
+              )
   
     # make save_title by formatting title
     ggsave(here::here("plots", "predictive_checks", paste0(save_title, ".jpg")), plot = plot, width = 20, height = 6)
