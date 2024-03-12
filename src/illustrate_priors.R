@@ -115,9 +115,9 @@ ggsave(file.path("plots", "illustrate_priors", "alpha_priors.jpg"), alpha_plot, 
 # plot the tau and alpha prior on two seperate plots that are used for prior predictive checks
 prior_type1 <- function() {
   # generate data for the first prior distribution
-  logtaus1 <- rnorm(8000, 0, 0.2)
+  logtaus1 <- rnorm(8000, 0, 1)
   taus1 <- exp(logtaus1)
-  data1 <- data.frame(taus = taus1, prior = "Lognormal (0, 0.2)")
+  data1 <- data.frame(taus = taus1, prior = "Lognormal (0, 1)")
   
   # generate data for the second prior distribution
   alphas1 <- runif(8000, 0, 1)
