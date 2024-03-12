@@ -2,23 +2,23 @@ pacman::p_load(tidyverse, here, cmdstanr, posterior)
 
 #' predictive_check_plot
 predictive_check_plot <- function(predict_df, title, save_title){
-    plot <- ggplot(predict_df, aes(x = trial)) +
+  plot <- ggplot(predict_df, aes(x = trial)) +
         # value 1 
-        geom_ribbon(aes(ymin = value1_1st_quartile, ymax = value1_3rd_quartile, fill = "Value 1"), color = NA, alpha = 0.5, show.legend=FALSE) +
-        geom_line(aes(y = value1_median, color = "Value 1")) +
+        geom_ribbon(aes(ymin = value1_1st_quartile, ymax = value1_3rd_quartile, fill = "Value 1 (Right Hand)"), color = NA, alpha = 0.5, show.legend=FALSE) +
+        geom_line(aes(y = value1_median, color = "Value 1 (Right Hand)")) +
         
-        # value 2 
-        geom_ribbon(aes(ymin = value2_1st_quartile, ymax = value2_3rd_quartile, fill = "Value 2"), color = NA, alpha = 0.5, show.legend=FALSE) +
-        geom_line(aes(y = value2_median, color = "Value 2")) +
+        # value 0
+        geom_ribbon(aes(ymin = value2_1st_quartile, ymax = value2_3rd_quartile, fill = "Value 0 (Left Hand)"), color = NA, alpha = 0.5, show.legend=FALSE) +
+        geom_line(aes(y = value2_median, color = "Value 0 (Left Hand)")) +
         
         # add hider choice 
         geom_line(aes(y = hider_choice, color = "Hider Choice")) +
 
         # color and fill of the lines 
-        scale_color_manual(values = c("Value 1" = "blue", "Value 2" = "darkgreen", "Hider Choice" = "red")) +
+        scale_color_manual(values = c("Value 1 (Right Hand)" = "blue", "Value 0 (Left Hand)" = "darkgreen", "Hider Choice" = "red")) +
         scale_fill_manual(name = "Legend",
-                          values = c("Value 1" = "lightblue", "Value 2" = "lightgreen"),
-                          labels = c("Value 1", "Value 2")) +
+                          values = c("Value 1 (Right Hand)" = "lightblue", "Value 0 (Left Hand)" = "lightgreen"),
+                          labels = c("Value 1 (Right Hand)", "Value 0 (Left Hand)")) +
 
         # theme, labels, legend, font sizes
         labs(title = title, x = "Trial", y = "Value") +
