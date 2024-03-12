@@ -50,12 +50,12 @@ plot_tau_priors <- function(mean1, sd1, mean2, sd2) {
   
   # plot
   plot <- ggplot(combined_data, aes(x = taus, fill = prior)) +
-    geom_density(alpha = 0.5) +
+    geom_density(alpha = 0.4) +
     labs(title = "Prior distribution of tau",
          x = "tau",
          y = "Density") +
     xlim(0, 7) +
-    scale_fill_manual(values = c("darkgrey", "#FF0000")) +
+    scale_fill_manual(values = c("#0BDA51", "#FF0000")) +
     theme_bw()+
     theme(legend.position="bottom",
           legend.title=element_blank(), 
@@ -88,13 +88,13 @@ plot_alpha_priors <- function() {
   
   # plot
   plot <- ggplot(combined_data, aes(x = alphas, fill = prior)) +
-    geom_density(alpha = 0.5) +
+    geom_density(alpha = 0.4) +
     labs(title = "Prior distribution of alpha",
          x = "alpha",
          y = "Density") +
     xlim(0, 1) +
     ylim(0, 2) +
-    scale_fill_manual(values = c("darkgrey", "#FF0000")) +
+    scale_fill_manual(values = c("#0BDA51", "#FF0000")) +
     theme_bw()+
     theme(legend.position="bottom",
           legend.title=element_blank(), 
