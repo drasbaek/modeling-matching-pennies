@@ -1,4 +1,4 @@
-pacman::p_load(tidyverse, here, gridExtra)
+pacman::p_load(tidyverse, here, ggpubr)
 
 # plot estimated MPD versus true values
 recovery_plot_MPD <- function(param_df, parameter, color, n_trials, prior_name){
@@ -106,11 +106,11 @@ for (filepath in alpha_files){
 # plot all 6 alpha plots in grid
 alpha_order <- c("alpha_60_baseline", "alpha_120_baseline", "alpha_300_baseline", "alpha_60_diffAlpha", "alpha_120_diffAlpha", "alpha_300_diffAlpha")
 alpha_plots <- plot_list[alpha_order]
-final_alpha_plot <- do.call(grid.arrange, c(alpha_plots, ncol = 3, nrow = 2))
+final_alpha_plot <- ggarrange(plotlist = alpha_plots, ncol = 3, nrow = 2)
 ggsave(here::here("plots", "recovery", "alpha_recovery_big.jpg"), final_alpha_plot, width = 20, height = 15)
 
 # plot all 6 tau plots in grid
 tau_order <- c("tau_60_baseline", "tau_120_baseline", "tau_300_baseline", "tau_60_diffTau", "tau_120_diffTau", "tau_300_diffTau")
 tau_plots <- plot_list[tau_order]
-final_tau_plot <- do.call(grid.arrange, c(tau_plots, ncol = 3, nrow = 2))
-ggsave(here::here("plots", "recovery", "tau_recovery_big.jpg"), final_tau_plot, width = 25, height = 15)
+final_tau_plot <-ggarrange(plotlist = tau_plots, ncol = 3, nrow = 2)
+ggsave(here::here("plots", "recovery", "tau_recovery_big.jpg"), final_tau_plot, width = 20, height = 15)
