@@ -1,4 +1,4 @@
-pacman::p_load(tidyverse, here, cmdstanr, posterior)
+pacman::p_load(tidyverse, here, cmdstanr, posterior, ggpubr)
 
 #' predictive_check_plot
 predictive_check_plot <- function(predict_df, title, save_title){
@@ -80,7 +80,7 @@ posterior_update_plot <- function(posterior_samples_list, posterior_samples_name
             plot.title = element_text(size = 14)
             )
 
-    ggsave(here::here("plots", "posterior_updates", paste0(param_col, "_", posterior_samples_name, ".jpg")), plot = plot, width = 10, height = 6)
+    return(plot)
 }
 
 # load the data from the predictive checks
@@ -120,21 +120,44 @@ predictive_check_plot(posterior_LowLearning_Stochastic_predict, "Posterior Predi
 
 # for loop to plot all the posterior
 names <- names(posterior_samples)
+
+alpha_plots <- c()
+tau_plots <- c()
+
 for (i in 1:length(posterior_samples)){
   # get the name of the posterior
   name <- names[i]
+  pretty_name <- gsub("_", "-", name)
 
   # index the param_dict to get the alpha and tau
   true_alpha <- param_dict[[paste(name, ".alpha", sep = "")]]
   true_tau <- param_dict[[paste(name, ".tau", sep = "")]]
 
-  title_alpha <- paste0("Posterior update for: alpha (alpha = ", true_alpha, ", tau = ", true_tau, ")")
-  title_tau <- paste0("Posterior update for: tau (alpha = ", true_alpha, ", tau = ", true_tau, ")")
+  title_alpha <- paste0(pretty_name, " (alpha = ", true_alpha, ", tau = ", true_tau, ")")
+  title_tau <- paste0(pretty_name, " (alpha = ", true_alpha, ", tau = ", true_tau, ")")
 
-  # plot the posterior
-  posterior_update_plot(posterior_samples[[name]], name, true_alpha, "alpha", title_alpha)
-  posterior_update_plot(posterior_samples[[name]], name, true_tau, "tau", title_tau)
+  # plot the posterior update, append to list
+  alpha_plots[[i]] <- posterior_update_plot(posterior_samples[[name]], name, true_alpha, "alpha", title_alpha)
+  tau_plots[[i]] <- posterior_update_plot(posterior_samples[[name]], name, true_tau, "tau", title_tau)
 }
 
+### ALPHA ### 
+# plot them all in one
+alpha_final_plot <- ggarrange(plotlist = alpha_plots, ncol = 2, nrow = 2)
 
+# add margin for main title (written with annotate figure)
+alpha_final_plot <- alpha_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
+alpha_final_plot <- annotate_figure(alpha_final_plot, top = text_grob("Posterior updates for alpha", vjust=1.6, size=20))
 
+# save 
+ggsave(here::here("plots", "posterior_updates", "alpha_posterior_update.jpg"), alpha_final_plot, width = 20, height = 12)
+
+### TAU ### 
+tau_final_plot <- ggarrange(plotlist = tau_plots, ncol = 2, nrow = 2)
+
+# add margin for main title (written with annotate figure)
+tau_final_plot <- tau_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
+tau_final_plot <- annotate_figure(tau_final_plot, top = text_grob("Posterior updates for tau", vjust=1.6, size=20))
+
+#save
+ggsave(here::here("plots", "posterior_updates", "tau_posterior_update.jpg"), tau_final_plot, width = 20, height = 12)
