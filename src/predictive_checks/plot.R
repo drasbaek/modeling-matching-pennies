@@ -46,18 +46,39 @@ predictive_check_plot <- function(predict_df, title, save_title){
 posterior_update_plot <- function(posterior_samples_list, posterior_samples_name, param_true, param_col, title){
     draws_df <- as_draws_df(posterior_samples_list$draws())
     
-    # set max on x-axis based on param
-    max_x = ifelse(param_col == "alpha", 1, 5)
+    # set max on x-axis based on param, limit to 1 for alpha, 8 for tau
+    max_x = ifelse(param_col == "alpha", 1, 7)
     
     plot <- ggplot(draws_df) +
-        geom_density(aes(!!sym(param_col)), fill = "blue", alpha = 0.3) +
-        geom_density(aes(!!sym(paste0(param_col, "_prior"))), fill = "red", alpha = 0.3) +
-        geom_vline(xintercept = param_true, color = "black", linetype = "dashed") +
-        xlim(0, max_x) +
-        xlab("Learning Rate") +
-        ylab("Posterior Density") +
-        labs(title=title) +
-        theme_bw()
+      # posterior
+      geom_density(aes(!!sym(param_col), fill = "Posterior"), alpha = 0.4) +
+      
+      # prior 
+      geom_density(aes(!!sym(paste0(param_col, "_prior")), fill = "Prior"), alpha = 0.4) +
+      
+      # true value
+      geom_vline(aes(xintercept = param_true, color = "True Value"), linetype = "dashed") +
+      
+      xlim(0, max_x) +
+      xlab(param_col) +
+      ylab("Posterior Density") +
+      labs(title=title) +
+      scale_fill_manual(name = "Distribution",
+                        values = c("Posterior" = "#005DFF", "Prior" = "#FF0000"),
+                        labels = c("Posterior", "Prior")) +
+      scale_color_manual(name = "",
+                        values = "black",
+                        labels = "True Value") +
+      theme_bw() +
+      theme(legend.position="bottom", 
+            legend.title=element_blank(), 
+            legend.key.size = unit(0.4, 'cm'), 
+            legend.text = element_text(size = 10),
+            legend.box.spacing = unit(5, "pt"),
+            axis.text=element_text(size=10), 
+            axis.title=element_text(size=12), 
+            plot.title = element_text(size = 14)
+            )
 
     ggsave(here::here("plots", "posterior_updates", paste0(param_col, "_", posterior_samples_name, ".jpg")), plot = plot, width = 10, height = 6)
 }
