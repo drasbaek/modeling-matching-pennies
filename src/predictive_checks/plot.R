@@ -1,7 +1,7 @@
 pacman::p_load(tidyverse, here, cmdstanr, posterior)
 
 #' predictive_check_plot
-predictive_check_plot <- function(predict_df, title){
+predictive_check_plot <- function(predict_df, title, save_title){
     plot <- ggplot(predict_df, aes(x = trial)) +
         geom_ribbon(aes(ymin = value1_1st_quartile, ymax = value1_3rd_quartile), fill = "lightblue", alpha = 0.5) +
         geom_line(aes(y = value1_median), color = "blue") +
@@ -12,7 +12,6 @@ predictive_check_plot <- function(predict_df, title){
         theme_bw()
   
     # make save_title by formatting title
-    save_title <- title
     ggsave(here::here("plots", "predictive_checks", paste0(save_title, ".jpg")), plot = plot, width = 20, height = 6)
 }
 
@@ -70,11 +69,11 @@ posterior_samples <- list(
 )
 
 # plot the predictive checks
-predictive_check_plot(prior_predict, "Prior Predictive Check")
-predictive_check_plot(posterior_Learning_Deterministic_predict, "Posterior Predictive Check: Learning-Deterministic")
-predictive_check_plot(posterior_Learning_Stochastic_predict, "Posterior Predictive Check: Learning-Stochastic")
-predictive_check_plot(posterior_LowLearning_Deterministic_predict, "Posterior Predictive Check: LowLearning-Deterministic")
-predictive_check_plot(posterior_LowLearning_Stochastic_predict, "Posterior Predictive Check: LowLearning-Stochastic")
+predictive_check_plot(prior_predict, "Prior Predictive Check", "prior_check")
+predictive_check_plot(posterior_Learning_Deterministic_predict, "Posterior Predictive Check: Learning-Deterministic", "posterior_check_Learning_Deterministic")
+predictive_check_plot(posterior_Learning_Stochastic_predict, "Posterior Predictive Check: Learning-Stochastic", "posterior_check_Learning_Stochastic")
+predictive_check_plot(posterior_LowLearning_Deterministic_predict, "Posterior Predictive Check: LowLearning-Deterministic", "posterior_check_LowLearning_Deterministic")
+predictive_check_plot(posterior_LowLearning_Stochastic_predict, "Posterior Predictive Check: LowLearning-Stochastic", "posterior_check_LowLearning_Stochastic")
 
 # for loop to plot all the posterior
 names <- names(posterior_samples)
