@@ -4,13 +4,19 @@ pacman::p_load(tidyverse, here)
 recovery_plot_MPD <- function(param_df, parameter, color, n_trials){
     plot <- param_df %>%
         ggplot(aes(x = !!sym(paste0("true_", parameter)), y = !!sym(paste0("MPD_", parameter)), color=!!sym(paste0("true_", color)))) + 
-        geom_point() +
+        geom_point(aes(size=2)) +
         scale_color_gradient(low = "#FFD580", high = "darkblue")  +
-        geom_abline(intercept = 0, slope = 1, color = "black") +
+        geom_abline(intercept = 0, slope = 1, color = "black", linewidth=1.5) +
         labs(title = paste0("Estimated ", parameter, " (MPD)", " vs True ", parameter, " (", n_trials, " trials)"),
              y = paste0("Estimated ", parameter),
              x = paste0("True ", parameter, " (MPD)")) +
-        theme_bw()
+        theme_bw()+
+        theme(legend.key.size = unit(1, 'cm'), 
+              legend.text = element_text(size = 12),
+              legend.box.spacing = unit(0, "pt"),
+              axis.text=element_text(size=12), 
+              axis.title=element_text(size=14), 
+              plot.title = element_text(size = 16))
 
     return(plot)
 }
