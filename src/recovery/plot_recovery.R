@@ -16,7 +16,8 @@ recovery_plot_MPD <- function(param_df, parameter, color, n_trials){
               legend.box.spacing = unit(0, "pt"),
               axis.text=element_text(size=12), 
               axis.title=element_text(size=14), 
-              plot.title = element_text(size = 16))
+              plot.title = element_text(size = 16)) +
+        guides(size=FALSE)
 
     return(plot)
 }
