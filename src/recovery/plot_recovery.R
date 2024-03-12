@@ -8,41 +8,42 @@ recovery_plot_MPD <- function(param_df, parameter, color, n_trials){
         scale_color_gradient(low = "#FFD580", high = "darkblue")  +
         geom_abline(intercept = 0, slope = 1, color = "black") +
         labs(title = paste0("Estimated ", parameter, " (MPD)", " vs True ", parameter, " (", n_trials, " trials)"),
-             y = paste0("True ", parameter),
-             x = paste0("Estimated ", parameter, " (MPD)")) +
+             y = paste0("Estimated ", parameter),
+             x = paste0("True ", parameter, " (MPD)")) +
         theme_bw()
 
     return(plot)
 }
 
-n_trials_list <- c(120, 300)
-for (n_trials in n_trials_list){
-    # load param_df csv
-    data_file_path <- here::here("data", "recovery", paste0(n_trials, "_trials_recovery.csv"))
-    param_df <- read_csv(data_file_path)
-
-    parameters <- c("alpha", "tau")
-    colors <- c("tau", "alpha")
-
-    for (j in 1:2) {
-        plot <- recovery_plot_MPD(param_df, parameters[j], colors[j], n_trials)
-        ggsave(here::here("plots", "recovery", paste0(parameters[j], "_", n_trials, "_MPD_recovery.jpg")), plot)
-    }
+get_prior_type <- function(filename) {
+  if (grepl("diffTau", filename)) {
+    return("diffTau")
+  } else if (grepl("diffAlpha", filename)) {
+    return("diffAlpha")
+  } else if (grepl("baseline", filename)) {
+    return("baseline")
+  } else {
+    return(NA)
+  }
 }
 
 # list all the files in the recovery folder
-recovery_files <- list.files(here::here("data", "recovery"), full.names = TRUE)
+all_recovery_files <- list.files(here::here("data", "recovery"), full.names = TRUE)
+baseline_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial_type(x) %in% c("baseline")))
+tau_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial_type(x) %in% c("diffTau")))
+alpha_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial_type(x) %in% c("diffAlpha")))
 
 # iterate through the files and plot the MPD recovery
-for (filepath in recovery_files){
+for (filepath in baseline_files){
     param_df <- read_csv(filepath)
     
     # get the BASIC filena
     filename <- basename(filepath)
     splitted_filename <- strsplit(filename, "_")
 
-    n_trials <- splitted_filename[[1]]
+    n_trials <- splitted_filename[[1]][1]
     prior_name <- strsplit(splitted_filename[[1]][[3]], ".", fixed = TRUE)[[1]][[1]]
+
     parameters <- c("alpha", "tau")
     colors <- c("tau", "alpha")
 
@@ -51,3 +52,33 @@ for (filepath in recovery_files){
         ggsave(here::here("plots", "recovery", paste0(parameters[j], "_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
     }
 }
+
+# iterate through the files and plot the MPD recovery
+for (filepath in tau_files){
+    param_df <- read_csv(filepath)
+    
+    # get the BASIC filena
+    filename <- basename(filepath)
+    splitted_filename <- strsplit(filename, "_")
+
+    n_trials <- splitted_filename[[1]][1]
+    prior_name <- strsplit(splitted_filename[[1]][[3]], ".", fixed = TRUE)[[1]][[1]]
+
+    plot <- recovery_plot_MPD(param_df, "tau", "alpha", n_trials)
+    ggsave(here::here("plots", "recovery", paste0("tau_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
+}
+
+for (filepath in alpha_files){
+    param_df <- read_csv(filepath)
+    
+    # get the BASIC filena
+    filename <- basename(filepath)
+    splitted_filename <- strsplit(filename, "_")
+
+    n_trials <- splitted_filename[[1]][1]
+    prior_name <- strsplit(splitted_filename[[1]][[3]], ".", fixed = TRUE)[[1]][[1]]
+
+    plot <- recovery_plot_MPD(param_df, "alpha", "tau", n_trials)
+    ggsave(here::here("plots", "recovery", paste0("alpha_", n_trials, "_", prior_name, "_recovery.jpg")), plot)
+}
+
