@@ -37,9 +37,9 @@ get_prior_type <- function(filename) {
 
 # list all the files in the recovery folder
 all_recovery_files <- list.files(here::here("data", "recovery"), full.names = TRUE)
-baseline_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial_type(x) %in% c("baseline")))
-tau_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial_type(x) %in% c("diffTau")))
-alpha_files <- subset(recovery_files, sapply(recovery_files, function(x) get_trial_type(x) %in% c("diffAlpha")))
+baseline_files <- subset(all_recovery_files, sapply(all_recovery_files, function(x) get_prior_type(x) %in% c("baseline")))
+tau_files <- subset(all_recovery_files, sapply(all_recovery_files, function(x) get_prior_type(x) %in% c("diffTau")))
+alpha_files <- subset(all_recovery_files, sapply(all_recovery_files, function(x) get_prior_type(x) %in% c("diffAlpha")))
 
 # iterate through the files and plot the MPD recovery
 # Create a list to store plots
@@ -107,10 +107,10 @@ for (filepath in alpha_files){
 alpha_order <- c("alpha_60_baseline", "alpha_120_baseline", "alpha_300_baseline", "alpha_60_diffAlpha", "alpha_120_diffAlpha", "alpha_300_diffAlpha")
 alpha_plots <- plot_list[alpha_order]
 final_alpha_plot <- do.call(grid.arrange, c(alpha_plots, ncol = 3, nrow = 2))
-ggsave(here::here("plots", "recovery", "alpha_recovery_all.jpg"), final_alpha_plot, width = 20, height = 15)
+ggsave(here::here("plots", "recovery", "alpha_recovery_big.jpg"), final_alpha_plot, width = 20, height = 15)
 
 # plot all 6 tau plots in grid
 tau_order <- c("tau_60_baseline", "tau_120_baseline", "tau_300_baseline", "tau_60_diffTau", "tau_120_diffTau", "tau_300_diffTau")
 tau_plots <- plot_list[tau_order]
 final_tau_plot <- do.call(grid.arrange, c(tau_plots, ncol = 3, nrow = 2))
-ggsave(here::here("plots", "recovery", "tau_recovery_all.jpg"), final_tau_plot, width = 25, height = 15)
+ggsave(here::here("plots", "recovery", "tau_recovery_big.jpg"), final_tau_plot, width = 25, height = 15)
