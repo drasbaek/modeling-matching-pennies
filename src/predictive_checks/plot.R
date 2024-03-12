@@ -1,7 +1,7 @@
 pacman::p_load(tidyverse, here, cmdstanr, posterior, ggpubr)
 
 #' predictive_check_plot
-predictive_check_plot <- function(predict_df, title, save_title){
+predictive_check_plot <- function(predict_df, title){
   plot <- ggplot(predict_df, aes(x = trial)) +
         # value 1 
         geom_ribbon(aes(ymin = value1_1st_quartile, ymax = value1_3rd_quartile, fill = "Value 1 (Right Hand)"), color = NA, alpha = 0.5, show.legend=FALSE) +
@@ -25,16 +25,16 @@ predictive_check_plot <- function(predict_df, title, save_title){
         theme_bw()+
         theme(legend.position="bottom", 
               legend.title=element_blank(), 
-              legend.key.size = unit(1, 'cm'), 
-              legend.text = element_text(size = 12),
+              legend.key.size = unit(2, 'cm'), 
+              legend.key.width = unit(3, 'cm'),
+              legend.text = element_text(size = 14),
               legend.box.spacing = unit(0, "pt"),
-              axis.text=element_text(size=12), 
-              axis.title=element_text(size=14), 
-              plot.title = element_text(size = 16)
+              axis.text=element_text(size=14), 
+              axis.title=element_text(size=16), 
+              plot.title = element_text(size = 18)
               )
-  
-    # make save_title by formatting title
-    ggsave(here::here("plots", "predictive_checks", paste0(save_title, ".jpg")), plot = plot, width = 20, height = 6)
+
+  return(plot)
 }
 
 #' posterior_update_plot
@@ -104,6 +104,7 @@ samples_Learning_Stochastic <- readRDS(here::here("data", "predictive_checks", "
 samples_LowLearning_Deterministic <- readRDS(here::here("data", "predictive_checks", "posterior_LowLearning_Deterministic.rds"))
 samples_LowLearning_Stochastic <- readRDS(here::here("data", "predictive_checks", "posterior_LowLearning_Stochastic.rds"))
 
+# define lists with data to use for plotting (names become very relevant to plot in for loop with correct titles)
 posterior_samples <- list(
   "Learning_Deterministic"=samples_Learning_Deterministic,
   "Learning_Stochastic"=samples_Learning_Stochastic,
@@ -111,12 +112,37 @@ posterior_samples <- list(
   "LowLearning_Stochastic"=samples_LowLearning_Stochastic
 )
 
-# plot the predictive checks
-predictive_check_plot(prior_predict, "Prior Predictive Check", "prior_check")
-predictive_check_plot(posterior_Learning_Deterministic_predict, "Posterior Predictive Check: Learning-Deterministic", "posterior_check_Learning_Deterministic")
-predictive_check_plot(posterior_Learning_Stochastic_predict, "Posterior Predictive Check: Learning-Stochastic", "posterior_check_Learning_Stochastic")
-predictive_check_plot(posterior_LowLearning_Deterministic_predict, "Posterior Predictive Check: LowLearning-Deterministic", "posterior_check_LowLearning_Deterministic")
-predictive_check_plot(posterior_LowLearning_Stochastic_predict, "Posterior Predictive Check: LowLearning-Stochastic", "posterior_check_LowLearning_Stochastic")
+posterior_predict <- list(
+  "Learning_Deterministic"=posterior_Learning_Deterministic_predict,
+  "Learning_Stochastic"=posterior_Learning_Stochastic_predict,
+  "LowLearning_Deterministic"=posterior_LowLearning_Deterministic_predict,
+  "LowLearning_Stochastic"=posterior_LowLearning_Stochastic_predict
+)
+
+# plot predictive checks
+prior_plot <- predictive_check_plot(prior_predict, " ")
+prior_plot <- prior_plot + theme(plot.margin = margin(0.5, 0, 0, 0, "cm"))
+prior_plot <- annotate_figure(prior_plot, top = text_grob("Prior Predictive Checks", vjust=1.6, size=20))
+ggsave(here::here("plots", "predictive_checks", "prior_check.jpg"), prior_plot, width = 20, height = 6)
+
+
+names <- names(posterior_predict)
+posterior_plots <- c()
+for (i in 1:length(posterior_predict)){
+  # get the name of the posterior
+  name <- names[i]
+  pretty_name <- gsub("_", "-", name)
+
+  # plot the predictive check, append directly to list
+  posterior_plots[[i]] <- predictive_check_plot(posterior_predict[[name]], pretty_name)
+}
+
+# plot them all in one
+posterior_final_plot <- ggarrange(plotlist = posterior_plots, ncol = 1, nrow = 4)
+posterior_final_plot <- posterior_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
+posterior_final_plot <- annotate_figure(posterior_final_plot, top = text_grob("Posterior Predictive Checks", vjust=1.6, size=30))
+ggsave(here::here("plots", "predictive_checks", "posterior_check.jpg"), posterior_final_plot, width = 20, height = 24)
+
 
 # for loop to plot all the posterior
 names <- names(posterior_samples)
@@ -147,7 +173,7 @@ alpha_final_plot <- ggarrange(plotlist = alpha_plots, ncol = 2, nrow = 2)
 
 # add margin for main title (written with annotate figure)
 alpha_final_plot <- alpha_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
-alpha_final_plot <- annotate_figure(alpha_final_plot, top = text_grob("Posterior updates for alpha", vjust=1.6, size=20))
+alpha_final_plot <- annotate_figure(alpha_final_plot, top = text_grob("Posterior Updates for alpha", vjust=1.6, size=20))
 
 # save 
 ggsave(here::here("plots", "posterior_updates", "alpha_posterior_update.jpg"), alpha_final_plot, width = 20, height = 12)
@@ -157,7 +183,7 @@ tau_final_plot <- ggarrange(plotlist = tau_plots, ncol = 2, nrow = 2)
 
 # add margin for main title (written with annotate figure)
 tau_final_plot <- tau_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
-tau_final_plot <- annotate_figure(tau_final_plot, top = text_grob("Posterior updates for tau", vjust=1.6, size=20))
+tau_final_plot <- annotate_figure(tau_final_plot, top = text_grob("Posterior Updates for tau", vjust=1.6, size=20))
 
 #save
 ggsave(here::here("plots", "posterior_updates", "tau_posterior_update.jpg"), tau_final_plot, width = 20, height = 12)
