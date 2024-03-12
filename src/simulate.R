@@ -24,12 +24,13 @@ for (i in 1:length(n_trials_list)){
 games_df <- data.frame()
 
 # define the parameters we want to test c(alpha, tau)
-low_low <- c(0.1, 0.1)
-low_high <- c(0.1, 5)
-high_low <- c(0.9, 0.1)
-high_high <- c(0.9, 5)
-scenarios <- list(low_low, low_high, high_low, high_high)
-scenarios_labels <- c("low_low", "low_high", "high_low", "high_high")
+LowLearning_Stochastic <- c(0.1, 0.1)
+LowLearning_Deterministic <- c(0.1, 5)
+Learning_Stochastic <- c(0.9, 0.1)
+Learning_Deterministic <- c(0.9, 5) 
+
+scenarios <- list(LowLearning_Stochastic, LowLearning_Deterministic, Learning_Stochastic, Learning_Deterministic)
+scenarios_labels <- c("LowLearning_Stochastic", "LowLearning_Deterministic", "Learning_Stochastic", "Learning_Deterministic")
 
 # get the choices from the simple agent  
 set.seed(42)

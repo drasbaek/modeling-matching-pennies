@@ -13,7 +13,7 @@ predictive_check_plot <- function(predict_df, title){
   
     # make save_title by formatting title
     save_title <- title
-    ggsave(here::here("plots", "predictive_checks", paste0(save_title,".jpg")), plot = plot, width = 20, height = 6)
+    ggsave(here::here("plots", "predictive_checks", paste0(save_title, ".jpg")), plot = plot, width = 20, height = 6)
 }
 
 #' posterior_update_plot
@@ -43,38 +43,38 @@ posterior_update_plot <- function(posterior_samples_list, posterior_samples_name
 
 # load the data from the predictive checks
 prior_predict <- read_csv(here::here("data", "predictive_checks", "prior.csv"))
-posterior_high_high_predict <- read_csv(here::here("data", "predictive_checks", "posterior_high_high.csv"))
-posterior_high_low_predict <- read_csv(here::here("data", "predictive_checks", "posterior_high_low.csv"))
-posterior_low_high_predict <- read_csv(here::here("data", "predictive_checks", "posterior_low_high.csv"))
-posterior_low_low_predict <- read_csv(here::here("data", "predictive_checks", "posterior_low_low.csv"))
+posterior_Learning_Deterministic_predict <- read_csv(here::here("data", "predictive_checks", "posterior_Learning_Deterministic.csv"))
+posterior_Learning_Stochastic_predict <- read_csv(here::here("data", "predictive_checks", "posterior_Learning_Stochastic.csv"))
+posterior_LowLearning_Deterministic_predict <- read_csv(here::here("data", "predictive_checks", "posterior_LowLearning_Deterministic.csv"))
+posterior_LowLearning_Stochastic_predict <- read_csv(here::here("data", "predictive_checks", "posterior_LowLearning_Stochastic.csv"))
 
 # create dictionary to use for plotting
 param_dict <- c(
-  "high_high"=c(posterior_high_high_predict[1,"alpha"], posterior_high_high_predict[1,"tau"]),
-  "high_low"=c(posterior_high_low_predict[1,"alpha"], posterior_high_low_predict[1,"tau"]),
-  "low_high"=c(posterior_low_high_predict[1,"alpha"], posterior_low_high_predict[1,"tau"]),
-  "low_low"=c(posterior_low_low_predict[1,"alpha"], posterior_low_low_predict[1,"tau"])
+  "Learning_Deterministic"=c(posterior_Learning_Deterministic_predict[1,"alpha"], posterior_Learning_Deterministic_predict[1,"tau"]),
+  "Learning_Stochastic"=c(posterior_Learning_Stochastic_predict[1,"alpha"], posterior_Learning_Stochastic_predict[1,"tau"]),
+  "LowLearning_Deterministic"=c(posterior_LowLearning_Deterministic_predict[1,"alpha"], posterior_LowLearning_Deterministic_predict[1,"tau"]),
+  "LowLearning_Stochastic"=c(posterior_LowLearning_Stochastic_predict[1,"alpha"], posterior_LowLearning_Stochastic_predict[1,"tau"])
 )
 
 # load all the posterior samples from rdata
-samples_high_high <- readRDS(here::here("data", "predictive_checks", "posterior_high_high.rds"))
-samples_high_low <- readRDS(here::here("data", "predictive_checks", "posterior_high_low.rds"))
-samples_low_high <- readRDS(here::here("data", "predictive_checks", "posterior_low_high.rds"))
-samples_low_low <- readRDS(here::here("data", "predictive_checks", "posterior_low_low.rds"))
+samples_Learning_Deterministic <- readRDS(here::here("data", "predictive_checks", "posterior_Learning_Deterministic.rds"))
+samples_Learning_Stochastic <- readRDS(here::here("data", "predictive_checks", "posterior_Learning_Stochastic.rds"))
+samples_LowLearning_Deterministic <- readRDS(here::here("data", "predictive_checks", "posterior_LowLearning_Deterministic.rds"))
+samples_LowLearning_Stochastic <- readRDS(here::here("data", "predictive_checks", "posterior_LowLearning_Stochastic.rds"))
 
 posterior_samples <- list(
-  "high_high"=samples_high_high,
-  "high_low"=samples_high_low,
-  "low_high"=samples_low_high,
-  "low_low"=samples_low_low
+  "Learning_Deterministic"=samples_Learning_Deterministic,
+  "Learning_Stochastic"=samples_Learning_Stochastic,
+  "LowLearning_Deterministic"=samples_LowLearning_Deterministic,
+  "LowLearning_Stochastic"=samples_LowLearning_Stochastic
 )
 
 # plot the predictive checks
 predictive_check_plot(prior_predict, "Prior Predictive Check")
-predictive_check_plot(posterior_high_high_predict, "Posterior Predictive Check: High High")
-predictive_check_plot(posterior_high_low_predict, "Posterior Predictive Check: High Low")
-predictive_check_plot(posterior_low_high_predict, "Posterior Predictive Check: Low High")
-predictive_check_plot(posterior_low_low_predict, "Posterior Predictive Check: Low Low")
+predictive_check_plot(posterior_Learning_Deterministic_predict, "Posterior Predictive Check: Learning-Deterministic")
+predictive_check_plot(posterior_Learning_Stochastic_predict, "Posterior Predictive Check: Learning-Stochastic")
+predictive_check_plot(posterior_LowLearning_Deterministic_predict, "Posterior Predictive Check: LowLearning-Deterministic")
+predictive_check_plot(posterior_LowLearning_Stochastic_predict, "Posterior Predictive Check: LowLearning-Stochastic")
 
 # for loop to plot all the posterior
 names <- names(posterior_samples)
