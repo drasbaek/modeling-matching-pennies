@@ -1,6 +1,9 @@
 # script for plotting sigmoid curve +  priors
 pacman::p_load(tidyverse, ggpubr)
 
+# set seed to draw the same random numbers to not have to commit new plots all the time
+set.seed(43)
+
 plot_sigmoid_curves <- function(x_values, tau_values, colors, n_col, n_rows) {
   plots <- list()
   
@@ -90,6 +93,7 @@ plot_alpha_priors <- function() {
          x = "alpha",
          y = "Density") +
     xlim(0, 1) +
+    ylim(0, 2) +
     scale_fill_manual(values = c("darkgrey", "#FF0000")) +
     theme_bw()+
     theme(legend.position="bottom",
@@ -107,3 +111,63 @@ plot_alpha_priors <- function() {
 
 alpha_plot <- plot_alpha_priors()
 ggsave(file.path("plots", "illustrate_priors", "alpha_priors.jpg"), alpha_plot, width = 10, height = 6)
+
+# plot the tau and alpha prior on two seperate plots that are used for prior predictive checks
+prior_type1 <- function() {
+  # generate data for the first prior distribution
+  logtaus1 <- rnorm(8000, 0, 0.2)
+  taus1 <- exp(logtaus1)
+  data1 <- data.frame(taus = taus1, prior = "Lognormal (0, 0.2)")
+  
+  # generate data for the second prior distribution
+  alphas1 <- runif(8000, 0, 1)
+  data2 <- data.frame(alphas = alphas1, prior = "Uniform (0, 1)")
+
+  # plot logtaus1 
+  plot1 <- ggplot(data1, aes(x = taus, fill = prior)) +
+    geom_density(alpha = 0.5) +
+    labs(title = "tau",
+         x = "tau",
+         y = "Density") +
+    xlim(0, 7) +
+    ylim(0, 2) +
+    scale_fill_manual(values = c("#FF0000")) +
+    theme_bw()+
+    theme(legend.position="bottom",
+          legend.title=element_blank(), 
+          legend.key.size = unit(0.4, 'cm'), 
+          legend.text = element_text(size = 10),
+          legend.box.spacing = unit(5, "pt"),
+          axis.text=element_text(size=10), 
+          axis.title=element_text(size=12), 
+          plot.title = element_text(size = 12, hjust = 0.5))
+
+    # plot alphas1
+    plot2 <- ggplot(data2, aes(x = alphas, fill = prior)) +
+    geom_density(alpha = 0.5) +
+    labs(title = "alpha",
+         x = "alpha",
+         y = "Density") +
+    xlim(0, 1) +
+    ylim(0, 2) +
+    scale_fill_manual(values = c("#FF0000")) +
+    theme_bw()+
+    theme(legend.position="bottom",
+          legend.title=element_blank(), 
+          legend.key.size = unit(0.4, 'cm'), 
+          legend.text = element_text(size = 10),
+          legend.box.spacing = unit(5, "pt"),
+          axis.text=element_text(size=10), 
+          axis.title=element_text(size=12), 
+          plot.title = element_text(size = 12, hjust = 0.5))
+
+    # arrange
+    final_plot <- ggarrange(plot1, plot2, ncol = 2, nrow = 1)
+
+    final_plot <- ggpubr::annotate_figure(final_plot,top=text_grob("Prior distributions", size=14))
+
+    return(final_plot)
+}
+
+prior_type1_plot <- prior_type1()
+ggsave(file.path("plots", "illustrate_priors", "alpha_and_tau_prior1.jpg"), prior_type1_plot, width = 10, height = 6)
