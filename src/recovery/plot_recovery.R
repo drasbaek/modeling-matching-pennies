@@ -7,8 +7,8 @@ recovery_plot_MPD <- function(param_df, parameter, color, n_trials, prior_name){
         geom_point(aes(size=2)) +
         scale_color_gradient(low = "#FFD580", high = "darkblue")  +
         geom_abline(intercept = 0, slope = 1, color = "black", linewidth=1.5) +
-        labs(y = paste0("Estimated ", parameter),
-             x = paste0("True ", parameter, " (MPD)")) +
+        labs(y = paste0("Estimated ", parameter,  " (MPD)"),
+             x = paste0("True ", parameter)) +
         #ggtitle(paste0("Estimated ", parameter, " (MPD)", " vs True ", parameter, " (", n_trials, " trials)")) +
         ggtitle(paste0(n_trials, ": ", prior_name)) + 
         theme_bw()+
