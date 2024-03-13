@@ -72,12 +72,12 @@ posterior_update_plot <- function(posterior_samples_list, posterior_samples_name
       theme_bw() +
       theme(legend.position="bottom", 
             legend.title=element_blank(), 
-            legend.key.size = unit(0.4, 'cm'), 
-            legend.text = element_text(size = 10),
+            legend.key.size = unit(1, 'cm'), 
+            legend.text = element_text(size = 12),
             legend.box.spacing = unit(5, "pt"),
-            axis.text=element_text(size=10), 
-            axis.title=element_text(size=12), 
-            plot.title = element_text(size = 14)
+            axis.text=element_text(size=12), 
+            axis.title=element_text(size=16), 
+            plot.title = element_text(size = 16)
             )
 
     return(plot)
@@ -181,12 +181,12 @@ for (i in 1:length(posterior_samples)){
 # plot them all in one
 alpha_trace_final <- ggarrange(plotlist = alpha_traceplots, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
 alpha_trace_final <- alpha_trace_final + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
-alpha_trace_final <- annotate_figure(alpha_trace_final, top = text_grob("Traceplots for alpha", vjust=1.6, size=30))
+alpha_trace_final <- annotate_figure(alpha_trace_final, top = text_grob("alpha", vjust=1.6, size=30))
 ggsave(here::here("plots", "traceplots", "alpha_traceplots.jpg"), alpha_trace_final, width = 15, height = 10)
 
 tau_trace_final <- ggarrange(plotlist = tau_traceplots, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
 tau_trace_final <- tau_trace_final + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
-tau_trace_final <- annotate_figure(tau_trace_final, top = text_grob("Traceplots for tau", vjust=1.6, size=30))
+tau_trace_final <- annotate_figure(tau_trace_final, top = text_grob("tau", vjust=1.6, size=30))
 ggsave(here::here("plots", "traceplots", "tau_traceplots.jpg"), tau_trace_final, width = 15, height = 10)
 
 # for loop to plot all the posterior
@@ -214,21 +214,21 @@ for (i in 1:length(posterior_samples)){
 
 ### ALPHA ### 
 # plot them all in one
-alpha_final_plot <- ggarrange(plotlist = alpha_plots, ncol = 2, nrow = 2)
+alpha_final_plot <- ggarrange(plotlist = alpha_plots, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
 
 # add margin for main title (written with annotate figure)
 alpha_final_plot <- alpha_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
-alpha_final_plot <- annotate_figure(alpha_final_plot, top = text_grob("Posterior Updates for alpha", vjust=1.6, size=20))
+alpha_final_plot <- annotate_figure(alpha_final_plot, top = text_grob("alpha", vjust=1.6, size=25))
 
 # save 
 ggsave(here::here("plots", "posterior_updates", "alpha_posterior_update.jpg"), alpha_final_plot, width = 20, height = 12)
 
 ### TAU ### 
-tau_final_plot <- ggarrange(plotlist = tau_plots, ncol = 2, nrow = 2)
+tau_final_plot <- ggarrange(plotlist = tau_plots, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
 
 # add margin for main title (written with annotate figure)
 tau_final_plot <- tau_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
-tau_final_plot <- annotate_figure(tau_final_plot, top = text_grob("Posterior Updates for tau", vjust=1.6, size=20))
+tau_final_plot <- annotate_figure(tau_final_plot, top = text_grob("tau", vjust=1.6, size=25))
 
 #save
 ggsave(here::here("plots", "posterior_updates", "tau_posterior_update.jpg"), tau_final_plot, width = 20, height = 12)
