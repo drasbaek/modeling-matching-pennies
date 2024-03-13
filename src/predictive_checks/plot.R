@@ -234,7 +234,7 @@ alpha_final_plot <- annotate_figure(alpha_final_plot, top = text_grob("alpha", v
 ggsave(here::here("plots", "posterior_updates", "alpha_posterior_update.jpg"), alpha_final_plot, width = 20, height = 12)
 
 ### TAU ### 
-tau_final_plot <- ggarrange(plotlist = tau_plots, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+tau_final_plot <- ggarrange(plotlist = tau_plots, ncol = 2, nrow = 2)
 
 # add margin for main title (written with annotate figure)
 tau_final_plot <- tau_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
