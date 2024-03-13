@@ -138,7 +138,7 @@ for (i in 1:length(posterior_predict)){
 }
 
 # plot them all in one
-posterior_final_plot <- ggarrange(plotlist = posterior_plots, ncol = 1, nrow = 4)
+posterior_final_plot <- ggarrange(plotlist = posterior_plots, ncol = 1, nrow = 4, common.legend = TRUE, legend = "bottom")
 posterior_final_plot <- posterior_final_plot + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
 posterior_final_plot <- annotate_figure(posterior_final_plot, top = text_grob("Posterior Predictive Checks", vjust=1.6, size=30))
 ggsave(here::here("plots", "predictive_checks", "posterior_check.jpg"), posterior_final_plot, width = 20, height = 24)
