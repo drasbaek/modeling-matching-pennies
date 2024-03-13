@@ -14,7 +14,7 @@ The repository contains four folders:
 3. `stan` - the RL model coded in Stan (git ignores the C++ compiled version)
 4. `plots` - all plots
 
-For the code in `src`, see the individual README for a detailed description of its contents.
+For the code in `src`, see the seperate [src/README.md](https://github.com/drasbaek/modeling-matching-pennies/blob/main/src/README.md) for a detailed description of its contents.
 
 ## Usage 
 ### Setup
