@@ -83,6 +83,26 @@ posterior_update_plot <- function(posterior_samples_list, posterior_samples_name
     return(plot)
 }
 
+draw_trace_plots <- function(posterior_samples_list, param_col, title){
+  draws_df <- as_draws_df(posterior_samples_list$draws())
+  
+  plot <- ggplot(draws_df, aes(.iteration, !!sym(param_col), group = .chain, color = .chain)) +
+    geom_line() +
+    labs(title = title, x = "Iteration", y = "Value") +
+    theme_bw()+
+    theme(legend.position="bottom", 
+          legend.title=element_blank(), 
+          legend.key.size = unit(0.4, 'cm'), 
+          legend.text = element_text(size = 10),
+          legend.box.spacing = unit(5, "pt"),
+          axis.text=element_text(size=10), 
+          axis.title=element_text(size=12), 
+          plot.title = element_text(size = 14)
+          )
+
+  return(plot)
+}
+
 # load the data from the predictive checks
 prior_predict <- read_csv(here::here("data", "predictive_checks", "prior.csv"))
 posterior_Learning_Deterministic_predict <- read_csv(here::here("data", "predictive_checks", "posterior_Learning_Deterministic.csv"))
@@ -143,6 +163,31 @@ posterior_final_plot <- posterior_final_plot + theme(plot.margin = margin(1.5, 0
 posterior_final_plot <- annotate_figure(posterior_final_plot, top = text_grob("Posterior Predictive Checks", vjust=1.6, size=30))
 ggsave(here::here("plots", "predictive_checks", "posterior_check.jpg"), posterior_final_plot, width = 20, height = 24)
 
+
+names <- names(posterior_samples)
+alpha_traceplots <- c()
+tau_traceplots <- c()
+
+for (i in 1:length(posterior_samples)){
+  # get the name of the posterior
+  name <- names[i]
+  pretty_name <- gsub("_", "-", name)
+
+  # plot the predictive check, append directly to list
+  alpha_traceplots[[i]] <- draw_trace_plots(posterior_samples[[name]], "alpha", pretty_name)
+  tau_traceplots[[i]] <- draw_trace_plots(posterior_samples[[name]], "tau", pretty_name)
+}
+
+# plot them all in one
+alpha_trace_final <- ggarrange(plotlist = alpha_traceplots, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+alpha_trace_final <- alpha_trace_final + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
+alpha_trace_final <- annotate_figure(alpha_trace_final, top = text_grob("Traceplots for alpha", vjust=1.6, size=30))
+ggsave(here::here("plots", "traceplots", "alpha_traceplots.jpg"), alpha_trace_final, width = 15, height = 10)
+
+tau_trace_final <- ggarrange(plotlist = tau_traceplots, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+tau_trace_final <- tau_trace_final + theme(plot.margin = margin(1.5, 0, 0, 0, "cm"))
+tau_trace_final <- annotate_figure(tau_trace_final, top = text_grob("Traceplots for tau", vjust=1.6, size=30))
+ggsave(here::here("plots", "traceplots", "tau_traceplots.jpg"), tau_trace_final, width = 15, height = 10)
 
 # for loop to plot all the posterior
 names <- names(posterior_samples)
